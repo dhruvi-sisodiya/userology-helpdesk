@@ -51,8 +51,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Add loading states for images
-    const images = document.querySelectorAll('img');
+    // Add loading states for images (exclude header logo)
+    const images = document.querySelectorAll('img:not(.header-logo)');
     images.forEach(img => {
         img.addEventListener('load', function() {
             this.style.opacity = '1';
