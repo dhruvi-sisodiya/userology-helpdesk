@@ -14,30 +14,19 @@ class OfflineWebsiteGenerator:
     def __init__(self, export_dir="zendesk_export_userology"):
         self.export_dir = export_dir
         self.output_dir = "offline_help_center"
-        self.attachments_dir = f"{export_dir}/attachments"
         
         # Load data
         self.categories = self.load_json("categories.json")
         self.sections = self.load_json("sections.json")
         self.articles = self.load_json("articles.json")
-        self.manifest = self.load_json("manifest.json")
         
         # Create output directory with organized structure
         os.makedirs(self.output_dir, exist_ok=True)
         os.makedirs(f"{self.output_dir}/css", exist_ok=True)
         os.makedirs(f"{self.output_dir}/js", exist_ok=True)
-        os.makedirs(f"{self.output_dir}/attachments", exist_ok=True)
         os.makedirs(f"{self.output_dir}/sections", exist_ok=True)
         os.makedirs(f"{self.output_dir}/articles", exist_ok=True)
         os.makedirs(f"{self.output_dir}/categories", exist_ok=True)
-        os.makedirs(f"{self.output_dir}/videos", exist_ok=True)
-        
-        # Set up session for downloading
-        import requests
-        self.session = requests.Session()
-        
-        # Copy attachments
-        self.copy_attachments()
         
         # Create mappings for easy lookup
         self.sections_by_category = {}
@@ -62,188 +51,53 @@ class OfflineWebsiteGenerator:
         with open(f"{self.export_dir}/{filename}", 'r', encoding='utf-8') as f:
             return json.load(f)
 
-    def copy_attachments(self):
-        """Copy attachments to output directory"""
-        import shutil
-        if os.path.exists(self.attachments_dir):
-            for filename in os.listdir(self.attachments_dir):
-                src = os.path.join(self.attachments_dir, filename)
-                dst = os.path.join(self.output_dir, "attachments", filename)
-                shutil.copy2(src, dst)
-
-    def fix_image_urls(self, html_content):
-        """Replace Zendesk image URLs with local paths and fix YouTube embeds"""
-        # Pattern to match Zendesk article attachment URLs
-        pattern = r'https://support\.userology\.co/hc/article_attachments/(\d+)'
-        
-        def replace_url(match):
-            attachment_id = match.group(1)
-            # Find the corresponding local file
-            for article in self.articles:
-                if 'downloaded_attachments' in article:
-                    for attachment in article['downloaded_attachments']:
-                        if attachment_id in attachment.get('original_url', ''):
-                            return f"attachments/{attachment['filename']}"
-            return match.group(0)  # Return original if not found
-        
-        # Fix image URLs
-        html_content = re.sub(pattern, replace_url, html_content)
-        
-        # Fix YouTube iframe URLs to use HTTPS
-        youtube_pattern = r'src="//www\.youtube-nocookie\.com/embed/'
-        html_content = re.sub(youtube_pattern, 'src="https://www.youtube-nocookie.com/embed/', html_content)
-        
-        # Also fix any other protocol-relative URLs
-        protocol_pattern = r'src="//'
-        html_content = re.sub(protocol_pattern, 'src="https://', html_content)
-        
-        # Wrap YouTube iframes in responsive containers
-        youtube_iframe_pattern = r'<iframe[^>]*src="https://www\.youtube-nocookie\.com/embed/[^"]*"[^>]*></iframe>'
-        def wrap_youtube_iframe(match):
-            iframe_html = match.group(0)
-            return f'<div class="youtube-container">{iframe_html}</div>'
-        
-        html_content = re.sub(youtube_iframe_pattern, wrap_youtube_iframe, html_content)
-        
-        return html_content
-
-    def extract_attachments_from_html(self, html_content, article_id):
-        """Extract attachment URLs from HTML content"""
-        # Pattern to match Zendesk article attachment URLs
-        pattern = r'https://support\.userology\.co/hc/article_attachments/(\d+)'
-        matches = re.findall(pattern, html_content)
-        
-        attachments = []
-        seen_attachments = set()  # Track already processed attachments
-        
-        for i, attachment_id in enumerate(matches):
-            if attachment_id in seen_attachments:
-                continue
-            seen_attachments.add(attachment_id)
-                
-            attachment_url = f"https://support.userology.co/hc/article_attachments/{attachment_id}"
-            
-            # Try to get the original filename from the HTML
-            img_pattern = rf'<img[^>]*src="{re.escape(attachment_url)}"[^>]*alt="([^"]*)"'
-            img_match = re.search(img_pattern, html_content)
-            if img_match:
-                original_filename = img_match.group(1)
-            else:
-                # Try to get filename from title attribute
-                title_pattern = rf'<img[^>]*src="{re.escape(attachment_url)}"[^>]*title="([^"]*)"'
-                title_match = re.search(title_pattern, html_content)
-                if title_match:
-                    original_filename = title_match.group(1)
-                else:
-                    original_filename = f"attachment_{attachment_id}"
-            
-            # Clean filename
-            original_filename = re.sub(r'[<>:"/\\|?*]', '_', original_filename)
-            if not original_filename or original_filename == 'Image':
-                original_filename = f"attachment_{attachment_id}"
-            
-            filename = f"{article_id}_{i+1}_{original_filename}"
-            filepath = self.download_attachment(attachment_url, filename)
-            if filepath:
-                attachments.append({
-                    'attachment_id': attachment_id,
-                    'original_url': attachment_url,
-                    'local_path': filepath,
-                    'filename': filename,
-                    'original_filename': original_filename
-                })
-                print(f"Downloaded attachment: {filename}")
-            else:
-                print(f"Failed to download attachment: {attachment_url}")
-        
-        return attachments
-
-    def download_attachment(self, attachment_url, filename):
-        """Download and save an attachment"""
-        try:
-            response = self.session.get(attachment_url)
-            response.raise_for_status()
-            
-            filepath = os.path.join(self.output_dir, "attachments", filename)
-            with open(filepath, 'wb') as f:
-                f.write(response.content)
-            
-            return filepath
-        except Exception as e:
-            print(f"Error downloading attachment {filename}: {e}")
-            return None
-
     def create_css(self):
         """Create CSS styling for the help center"""
-        css_content = """
-/* Zendesk Copenhagen Theme - Offline Help Center */
+        css_content = """/* Userology Help Center - Clean Professional Design */
+
 :root {
-    /* Zendesk Brand Colors */
-    --zd-color-text-primary: #2F3941;
-    --zd-color-text-secondary: #68737D;
-    --zd-color-text-tertiary: #9CA3AF;
-    --zd-color-text-inverse: #FFFFFF;
-    --zd-color-text-link: #17494D;
-    --zd-color-text-link-hover: #0F3A3D;
-    
-    /* Background Colors */
-    --zd-color-background-primary: #FFFFFF;
-    --zd-color-background-secondary: #F7F8F9;
-    --zd-color-background-tertiary: #F1F3F4;
-    --zd-color-background-inverse: #2F3941;
-    
-    /* Border Colors */
-    --zd-color-border-primary: #E5E7EB;
-    --zd-color-border-secondary: #D1D5DB;
-    --zd-color-border-focus: #17494D;
-    
-    /* Accent Colors */
-    --zd-color-accent-primary: #17494D;
-    --zd-color-accent-secondary: #2F3941;
-    --zd-color-accent-tertiary: #68737D;
-    
-    /* Status Colors */
-    --zd-color-success: #10B981;
-    --zd-color-warning: #F59E0B;
-    --zd-color-error: #EF4444;
-    --zd-color-info: #3B82F6;
-    
+    /* Colors - Clean and Professional */
+    --color-primary: #3b82f6;
+    --color-primary-dark: #2563eb;
+    --color-primary-light: #60a5fa;
+
+    --color-text: #111827;
+    --color-text-light: #6b7280;
+    --color-text-lighter: #9ca3af;
+
+    --color-bg: #ffffff;
+    --color-bg-gray: #f9fafb;
+    --color-bg-light: #f3f4f6;
+
+    --color-border: #e5e7eb;
+    --color-border-light: #f3f4f6;
+
     /* Spacing */
-    --zd-spacing-xs: 4px;
-    --zd-spacing-sm: 8px;
-    --zd-spacing-md: 16px;
-    --zd-spacing-lg: 24px;
-    --zd-spacing-xl: 32px;
-    --zd-spacing-2xl: 48px;
-    
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.25rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+    --space-10: 2.5rem;
+    --space-12: 3rem;
+    --space-16: 4rem;
+
     /* Typography */
-    --zd-font-family-primary: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    --zd-font-family-mono: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace;
-    
-    /* Font Sizes */
-    --zd-font-size-xs: 12px;
-    --zd-font-size-sm: 14px;
-    --zd-font-size-md: 16px;
-    --zd-font-size-lg: 18px;
-    --zd-font-size-xl: 20px;
-    --zd-font-size-2xl: 24px;
-    --zd-font-size-3xl: 32px;
-    
-    /* Line Heights */
-    --zd-line-height-tight: 1.25;
-    --zd-line-height-normal: 1.5;
-    --zd-line-height-relaxed: 1.75;
-    
-    /* Shadows */
-    --zd-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --zd-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    --zd-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    
-    /* Border Radius */
-    --zd-border-radius-sm: 4px;
-    --zd-border-radius-md: 6px;
-    --zd-border-radius-lg: 8px;
-    --zd-border-radius-xl: 12px;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-mono: "SF Mono", Monaco, Consolas, monospace;
+
+    /* Shadows - Subtle */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+    --shadow-hover: 0 8px 16px -4px rgba(0, 0, 0, 0.12);
+
+    /* Radius */
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
 }
 
 * {
@@ -253,242 +107,278 @@ class OfflineWebsiteGenerator:
 }
 
 body {
-    font-family: var(--zd-font-family-primary);
-    font-size: var(--zd-font-size-md);
-    line-height: var(--zd-line-height-normal);
-    color: var(--zd-color-text-primary);
-    background-color: var(--zd-color-background-secondary);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--color-text);
+    background: var(--color-bg-gray);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+}
+
+/* Remove ALL underlines from links globally */
+a {
+    text-decoration: none;
+    color: inherit;
 }
 
 /* Container */
 .container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 var(--zd-spacing-lg);
+    padding: 0 var(--space-6);
 }
 
-/* Header - Zendesk Style */
+/* ========== HEADER ========== */
 .header {
-    background: var(--zd-color-background-primary);
-    border-bottom: 1px solid var(--zd-color-border-primary);
-    padding: var(--zd-spacing-lg) 0;
+    background: var(--color-bg);
+    border-bottom: 1px solid var(--color-border);
+    padding: var(--space-6) 0;
     position: sticky;
     top: 0;
     z-index: 100;
-    box-shadow: var(--zd-shadow-sm);
+    box-shadow: var(--shadow-sm);
 }
 
 .header-content {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    flex-wrap: wrap;
-    gap: var(--zd-spacing-md);
+    gap: var(--space-8);
 }
 
-.header h1 {
-    font-size: var(--zd-font-size-2xl);
-    font-weight: 600;
-    color: var(--zd-color-text-primary);
+.header-branding {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+}
+
+.header-logo {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    opacity: 1;
+}
+
+.header-text h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0;
+    line-height: 1.2;
+}
+
+.header-text p {
+    font-size: 0.875rem;
+    color: var(--color-text-light);
     margin: 0;
 }
 
-.header p {
-    font-size: var(--zd-font-size-sm);
-    color: var(--zd-color-text-secondary);
-    margin: 0;
-}
-
-/* Search Bar */
+/* ========== SEARCH ========== */
 .search-container {
     flex: 1;
-    max-width: 400px;
-    margin: 0 var(--zd-spacing-lg);
+    max-width: 500px;
 }
 
 .search-input {
     width: 100%;
-    padding: var(--zd-spacing-sm) var(--zd-spacing-md);
-    border: 1px solid var(--zd-color-border-secondary);
-    border-radius: var(--zd-border-radius-md);
-    font-size: var(--zd-font-size-sm);
-    background: var(--zd-color-background-primary);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    font-size: 0.9375rem;
+    transition: all 0.2s;
+    background: var(--color-bg);
 }
 
 .search-input:focus {
     outline: none;
-    border-color: var(--zd-color-border-focus);
-    box-shadow: 0 0 0 3px rgba(23, 73, 77, 0.1);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-/* Navigation */
+.search-input::placeholder {
+    color: var(--color-text-lighter);
+}
+
+/* ========== NAVIGATION ========== */
 .nav {
-    background: var(--zd-color-background-primary);
-    border-bottom: 1px solid var(--zd-color-border-primary);
-    padding: 0;
+    background: var(--color-bg);
+    border-bottom: 1px solid var(--color-border);
 }
 
 .nav ul {
     list-style: none;
     display: flex;
-    align-items: center;
-    margin: 0;
-    padding: 0;
-}
-
-.nav li {
-    margin: 0;
+    gap: var(--space-2);
 }
 
 .nav a {
     display: block;
-    padding: var(--zd-spacing-md) var(--zd-spacing-lg);
-    color: var(--zd-color-text-secondary);
-    text-decoration: none;
-    font-size: var(--zd-font-size-sm);
+    padding: var(--space-4) var(--space-5);
+    color: var(--color-text-light);
     font-weight: 500;
+    font-size: 0.9375rem;
     border-bottom: 2px solid transparent;
-    transition: all 0.2s ease;
+    transition: all 0.2s;
 }
 
-.nav a:hover,
+.nav a:hover {
+    color: var(--color-primary);
+    background: var(--color-bg-light);
+}
+
 .nav a.active {
-    color: var(--zd-color-text-link);
-    border-bottom-color: var(--zd-color-accent-primary);
-    background-color: var(--zd-color-background-tertiary);
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
 }
 
-/* Main Layout */
+/* ========== MAIN LAYOUT ========== */
 .main {
     display: grid;
-    grid-template-columns: 280px 1fr;
-    gap: var(--zd-spacing-2xl);
-    margin: var(--zd-spacing-2xl) 0;
-    min-height: calc(100vh - 200px);
+    grid-template-columns: 260px 1fr;
+    gap: var(--space-8);
+    margin: var(--space-8) 0;
+    align-items: start;
 }
 
-/* Sidebar */
+/* Pages without sidebar (categories, articles) */
+.main:not(:has(.sidebar)) {
+    grid-template-columns: 1fr;
+    max-width: 1400px;
+    margin: var(--space-8) auto;
+}
+
+/* ========== SIDEBAR ========== */
 .sidebar {
-    background: var(--zd-color-background-primary);
-    border: 1px solid var(--zd-color-border-primary);
-    border-radius: var(--zd-border-radius-lg);
-    padding: var(--zd-spacing-lg);
-    height: fit-content;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
     position: sticky;
-    top: calc(var(--zd-spacing-2xl) + 80px);
-    box-shadow: var(--zd-shadow-sm);
+    top: 140px;
 }
 
 .sidebar h3 {
-    color: var(--zd-color-text-primary);
-    font-size: var(--zd-font-size-lg);
-    font-weight: 600;
-    margin: 0 0 var(--zd-spacing-md) 0;
-    padding-bottom: var(--zd-spacing-sm);
-    border-bottom: 1px solid var(--zd-color-border-primary);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0 0 var(--space-4) 0;
 }
 
 .sidebar ul {
     list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-.sidebar li {
-    margin: 0;
 }
 
 .sidebar a {
     display: block;
-    padding: var(--zd-spacing-sm) 0;
-    color: var(--zd-color-text-secondary);
-    text-decoration: none;
-    font-size: var(--zd-font-size-sm);
-    border-radius: var(--zd-border-radius-sm);
-    transition: all 0.2s ease;
+    padding: var(--space-3) var(--space-4);
+    color: var(--color-text-light);
+    font-size: 0.9375rem;
+    border-radius: var(--radius-md);
+    transition: all 0.2s;
 }
 
 .sidebar a:hover {
-    color: var(--zd-color-text-link);
-    background-color: var(--zd-color-background-tertiary);
-    padding-left: var(--zd-spacing-sm);
+    color: var(--color-primary);
+    background: var(--color-bg-light);
 }
 
-/* Content Area */
+/* ========== CONTENT AREA ========== */
 .content {
-    background: var(--zd-color-background-primary);
-    border: 1px solid var(--zd-color-border-primary);
-    border-radius: var(--zd-border-radius-lg);
-    padding: var(--zd-spacing-2xl);
-    box-shadow: var(--zd-shadow-sm);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-10);
+    min-height: 500px;
+}
+
+/* Content without sidebar - more breathing room */
+.main:not(:has(.sidebar)) .content {
+    padding: var(--space-12);
+    border: none;
+    background: transparent;
 }
 
 .content h1 {
-    color: var(--zd-color-text-primary);
-    font-size: var(--zd-font-size-3xl);
+    font-size: 2rem;
     font-weight: 700;
-    margin: 0 0 var(--zd-spacing-md) 0;
-    line-height: var(--zd-line-height-tight);
+    color: var(--color-text);
+    margin: 0 0 var(--space-6) 0;
+    line-height: 1.2;
+}
+
+.content > p {
+    font-size: 1.0625rem;
+    color: var(--color-text-light);
+    margin: 0 0 var(--space-8) 0;
 }
 
 .content h2 {
-    color: var(--zd-color-text-primary);
-    font-size: var(--zd-font-size-2xl);
-    font-weight: 600;
-    margin: var(--zd-spacing-2xl) 0 var(--zd-spacing-md) 0;
-    padding-bottom: var(--zd-spacing-sm);
-    border-bottom: 1px solid var(--zd-color-border-primary);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin: var(--space-12) 0 var(--space-6) 0;
+}
+
+/* First h2 (like "Popular Articles") */
+.content h2:first-of-type {
+    margin-top: var(--space-10);
 }
 
 .content h3 {
-    color: var(--zd-color-text-primary);
-    font-size: var(--zd-font-size-xl);
+    font-size: 1.25rem;
     font-weight: 600;
-    margin: var(--zd-spacing-xl) 0 var(--zd-spacing-sm) 0;
+    color: var(--color-text);
+    margin: var(--space-8) 0 var(--space-4) 0;
 }
 
 .content h4 {
-    color: var(--zd-color-text-primary);
-    font-size: var(--zd-font-size-lg);
+    font-size: 1.125rem;
     font-weight: 600;
-    margin: var(--zd-spacing-lg) 0 var(--zd-spacing-sm) 0;
+    color: var(--color-text);
+    margin: var(--space-6) 0 var(--space-3) 0;
 }
 
 .content p {
-    margin: 0 0 var(--zd-spacing-md) 0;
-    color: var(--zd-color-text-primary);
-    line-height: var(--zd-line-height-relaxed);
+    margin: 0 0 var(--space-4) 0;
+    line-height: 1.7;
+}
+
+.content a {
+    color: var(--color-primary);
+    font-weight: 500;
+}
+
+.content a:hover {
+    color: var(--color-primary-dark);
+}
+
+.content ul,
+.content ol {
+    margin: var(--space-4) 0;
+    padding-left: var(--space-8);
+}
+
+.content li {
+    margin-bottom: var(--space-2);
+    line-height: 1.7;
 }
 
 .content img {
     max-width: 100%;
     height: auto;
-    border-radius: var(--zd-border-radius-md);
-    margin: var(--zd-spacing-md) 0;
-    box-shadow: var(--zd-shadow-sm);
+    border-radius: var(--radius-md);
+    margin: var(--space-6) 0;
 }
 
 /* YouTube embeds */
-.content iframe {
-    max-width: 100%;
-    height: auto;
-    border-radius: var(--zd-border-radius-lg);
-    margin: var(--zd-spacing-lg) 0;
-    box-shadow: var(--zd-shadow-md);
-}
-
 .youtube-container {
     position: relative;
     width: 100%;
-    height: 0;
-    padding-bottom: 56.25%; /* 16:9 aspect ratio */
-    margin: var(--zd-spacing-lg) 0;
-    border-radius: var(--zd-border-radius-lg);
+    padding-bottom: 56.25%;
+    margin: var(--space-8) 0;
+    border-radius: var(--radius-lg);
     overflow: hidden;
-    box-shadow: var(--zd-shadow-md);
 }
 
 .youtube-container iframe {
@@ -500,289 +390,410 @@ body {
     border: none;
 }
 
-.content ul, .content ol {
-    margin: var(--zd-spacing-md) 0;
-    padding-left: var(--zd-spacing-xl);
-}
-
-.content li {
-    margin-bottom: var(--zd-spacing-sm);
-    color: var(--zd-color-text-primary);
-    line-height: var(--zd-line-height-relaxed);
-}
-
-.content a {
-    color: var(--zd-color-text-link);
-    text-decoration: none;
-    font-weight: 500;
-}
-
-.content a:hover {
-    color: var(--zd-color-text-link-hover);
-    text-decoration: underline;
-}
-
-/* Article Grid */
+/* ========== ARTICLE GRID - PROPER GRID LAYOUT ========== */
 .article-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: var(--zd-spacing-lg);
-    margin: var(--zd-spacing-lg) 0;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: var(--space-8);
+    margin: var(--space-8) 0 0 0;
 }
 
-.article-list {
-    display: grid;
-    gap: var(--zd-spacing-md);
+/* Home page - 2 column max */
+.main:has(.sidebar) .article-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
 }
 
-/* Article Cards - Fully Clickable */
+/* Categories/Articles pages - 3 column */
+.main:not(:has(.sidebar)) .article-grid {
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: var(--space-6);
+}
+
+/* Single category - center it and make it bigger */
+.article-grid:has(:only-child) {
+    grid-template-columns: 1fr;
+    max-width: 600px;
+}
+
+.article-grid:has(:only-child) .article-card {
+    padding: var(--space-10);
+    min-height: 200px;
+    text-align: center;
+    justify-content: center;
+}
+
+/* ========== ARTICLE CARDS - CLEAN & MINIMAL ========== */
 .article-card {
-    display: block;
-    background: var(--zd-color-background-primary);
-    border: 1px solid var(--zd-color-border-primary);
-    border-radius: var(--zd-border-radius-lg);
-    padding: var(--zd-spacing-lg);
+    display: flex;
+    flex-direction: column;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-8);
     transition: all 0.2s ease;
-    box-shadow: var(--zd-shadow-sm);
-    text-decoration: none;
-    color: inherit;
-    height: 100%;
-    position: relative;
+    cursor: pointer;
+    min-height: 140px;
+}
+
+/* Remove any text decoration on card and children */
+.article-card,
+.article-card *,
+.article-card:hover,
+.article-card:hover * {
+    text-decoration: none !important;
 }
 
 .article-card:hover {
-    border-color: var(--zd-color-border-focus);
-    box-shadow: var(--zd-shadow-md);
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-hover);
     transform: translateY(-2px);
-    text-decoration: none;
-    color: inherit;
-}
-
-.article-card * {
-    text-decoration: none;
-}
-
-.article-card:hover * {
-    text-decoration: none;
 }
 
 .article-card h3 {
-    margin: 0 0 var(--zd-spacing-sm) 0;
-    font-size: var(--zd-font-size-lg);
+    font-size: 1.125rem;
     font-weight: 600;
-    color: var(--zd-color-text-primary);
-    line-height: var(--zd-line-height-tight);
+    color: var(--color-text);
+    line-height: 1.5;
+    margin: 0 0 auto 0;
+    flex-grow: 1;
+    transition: color 0.2s;
 }
 
 .article-card:hover h3 {
-    color: var(--zd-color-text-link);
-}
-
-.article-card h3 {
-    text-decoration: none;
-}
-
-.article-card:hover h3 {
-    text-decoration: none;
+    color: var(--color-primary);
 }
 
 .article-card .article-meta {
-    font-size: var(--zd-font-size-sm);
-    color: var(--zd-color-text-tertiary);
-    margin-bottom: var(--zd-spacing-sm);
+    font-size: 0.875rem;
+    color: var(--color-text-lighter);
+    margin: var(--space-4) 0 0 0;
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-border-light);
 }
 
+/* Legacy article items */
+.article-list {
+    display: grid;
+    gap: var(--space-4);
+}
 
-/* Legacy article-item for backward compatibility */
 .article-item {
-    background: var(--zd-color-background-primary);
-    border: 1px solid var(--zd-color-border-primary);
-    border-radius: var(--zd-border-radius-lg);
-    padding: var(--zd-spacing-lg);
-    transition: all 0.2s ease;
-    box-shadow: var(--zd-shadow-sm);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    transition: all 0.2s;
 }
 
 .article-item:hover {
-    border-color: var(--zd-color-border-focus);
-    box-shadow: var(--zd-shadow-md);
-    transform: translateY(-1px);
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-md);
 }
 
 .article-item h3 {
-    margin: 0 0 var(--zd-spacing-sm) 0;
-    font-size: var(--zd-font-size-lg);
+    font-size: 1.125rem;
     font-weight: 600;
+    margin: 0 0 var(--space-2) 0;
 }
 
 .article-item h3 a {
-    color: var(--zd-color-text-primary);
-    text-decoration: none;
+    color: var(--color-text);
 }
 
 .article-item h3 a:hover {
-    color: var(--zd-color-text-link);
+    color: var(--color-primary);
 }
 
 .article-meta {
-    font-size: var(--zd-font-size-sm);
-    color: var(--zd-color-text-tertiary);
-    margin-bottom: var(--zd-spacing-sm);
+    font-size: 0.875rem;
+    color: var(--color-text-lighter);
 }
 
 .article-excerpt {
-    color: var(--zd-color-text-secondary);
-    font-size: var(--zd-font-size-sm);
-    line-height: var(--zd-line-height-relaxed);
+    color: var(--color-text-light);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    margin-top: var(--space-2);
 }
 
-/* Footer */
+/* Breadcrumb */
+.breadcrumb {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: 0.875rem;
+    color: var(--color-text-lighter);
+    margin-bottom: var(--space-6);
+    padding: var(--space-2) var(--space-4);
+    background: var(--color-bg-light);
+    border-radius: var(--radius-md);
+}
+
+.breadcrumb a {
+    color: var(--color-primary);
+}
+
+.breadcrumb a:hover {
+    color: var(--color-primary-dark);
+}
+
+/* ========== FOOTER ========== */
 .footer {
-    background: var(--zd-color-background-inverse);
-    color: var(--zd-color-text-inverse);
+    background: var(--color-text);
+    color: rgba(255, 255, 255, 0.8);
     text-align: center;
-    padding: var(--zd-spacing-2xl) 0;
-    margin-top: var(--zd-spacing-2xl);
-    border-top: 1px solid var(--zd-color-border-primary);
+    padding: var(--space-12) 0;
+    margin-top: var(--space-16);
 }
 
 .footer p {
-    font-size: var(--zd-font-size-sm);
-    opacity: 0.8;
+    font-size: 0.875rem;
     margin: 0;
 }
 
-/* Responsive Design */
+/* ========== RESPONSIVE ========== */
 @media (max-width: 1024px) {
     .main {
         grid-template-columns: 1fr;
-        gap: var(--zd-spacing-lg);
     }
-    
+
     .sidebar {
         position: static;
         order: 2;
     }
-    
+
     .content {
         order: 1;
     }
-    
-    .article-grid {
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: var(--zd-spacing-md);
+
+    .article-grid,
+    .main:has(.sidebar) .article-grid,
+    .main:not(:has(.sidebar)) .article-grid {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     }
 }
 
 @media (max-width: 768px) {
     .container {
-        padding: 0 var(--zd-spacing-md);
+        padding: 0 var(--space-4);
     }
-    
+
     .header-content {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: stretch;
+        gap: var(--space-4);
     }
-    
+
     .search-container {
-        width: 100%;
         max-width: none;
-        margin: var(--zd-spacing-md) 0 0 0;
     }
-    
+
     .nav ul {
         flex-direction: column;
-        width: 100%;
+        gap: 0;
     }
-    
+
     .nav a {
         border-bottom: none;
-        border-left: 3px solid transparent;
+        border-left: 2px solid transparent;
     }
-    
-    .nav a:hover,
+
     .nav a.active {
-        border-left-color: var(--zd-color-accent-primary);
-        border-bottom-color: transparent;
+        border-left-color: var(--color-primary);
     }
-    
+
     .content {
-        padding: var(--zd-spacing-lg);
+        padding: var(--space-6);
     }
-    
+
     .content h1 {
-        font-size: var(--zd-font-size-2xl);
+        font-size: 1.75rem;
     }
-    
-    .main {
-        margin: var(--zd-spacing-lg) 0;
-    }
-    
-    .article-grid {
+
+    .article-grid,
+    .main:has(.sidebar) .article-grid,
+    .main:not(:has(.sidebar)) .article-grid {
         grid-template-columns: 1fr;
-        gap: var(--zd-spacing-md);
+        gap: var(--space-5);
+    }
+
+    .main:not(:has(.sidebar)) .content {
+        padding: var(--space-6);
     }
 }
 
 @media (max-width: 480px) {
     .content {
-        padding: var(--zd-spacing-md);
+        padding: var(--space-5);
     }
-    
+
     .content h1 {
-        font-size: var(--zd-font-size-xl);
-    }
-    
-    .sidebar {
-        padding: var(--zd-spacing-md);
+        font-size: 1.5rem;
     }
 }
 
-/* Print Styles */
-@media print {
-    .nav, .sidebar, .footer, .search-container {
-        display: none;
-    }
-    
-    .main {
-        grid-template-columns: 1fr;
-        margin: 0;
-    }
-    
-    .content {
-        box-shadow: none;
-        border: none;
-        padding: 0;
-    }
-    
-    .header {
-        position: static;
-        border-bottom: 2px solid var(--zd-color-text-primary);
-    }
-}
-
-/* Focus styles for accessibility */
-*:focus {
-    outline: 2px solid var(--zd-color-border-focus);
+/* ========== ACCESSIBILITY ========== */
+*:focus-visible {
+    outline: 2px solid var(--color-primary);
     outline-offset: 2px;
 }
 
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-    :root {
-        --zd-color-text-primary: #000000;
-        --zd-color-text-secondary: #333333;
-        --zd-color-border-primary: #000000;
-        --zd-color-border-secondary: #666666;
+/* Print styles */
+@media print {
+    .nav,
+    .sidebar,
+    .footer,
+    .search-container {
+        display: none;
+    }
+
+    .main {
+        grid-template-columns: 1fr;
+    }
+
+    .content {
+        border: none;
+        box-shadow: none;
     }
 }
 
-/* Reduced motion support */
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
     * {
         animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
+    }
+}
+
+/* ========== VIDEO GRID & CARDS ========== */
+.video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: var(--space-8);
+    margin: var(--space-8) 0 0 0;
+}
+
+.video-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.video-card:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+}
+
+.video-thumbnail {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: var(--color-bg-light);
+    overflow: hidden;
+    position: relative;
+}
+
+.video-thumbnail video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    background: #000;
+}
+
+.video-info {
+    padding: var(--space-6);
+    flex: 1;
+}
+
+.video-info h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--color-text);
+    line-height: 1.4;
+    margin: 0 0 var(--space-3) 0;
+}
+
+.video-description {
+    font-size: 0.9375rem;
+    color: var(--color-text-light);
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Video player responsive */
+@media (max-width: 768px) {
+    .video-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-6);
+    }
+}
+
+/* ========== TOPIC CARDS (for Browse Topics page) ========== */
+.topic-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: var(--space-6);
+    margin: var(--space-8) 0 var(--space-12) 0;
+}
+
+.topic-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--color-bg);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-8);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    text-align: center;
+}
+
+.topic-card:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+}
+
+.topic-icon {
+    font-size: 3rem;
+    margin-bottom: var(--space-4);
+    line-height: 1;
+}
+
+.topic-card h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0 0 var(--space-3) 0;
+    line-height: 1.3;
+}
+
+.topic-description {
+    font-size: 0.9375rem;
+    color: var(--color-text-light);
+    line-height: 1.6;
+    margin: 0 0 var(--space-4) 0;
+    flex-grow: 1;
+}
+
+.topic-meta {
+    font-size: 0.875rem;
+    color: var(--color-text-lighter);
+    font-weight: 500;
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-border-light);
+}
+
+/* Topic grid responsive */
+@media (max-width: 768px) {
+    .topic-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-5);
     }
 }
 """
@@ -845,8 +856,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Add loading states for images
-    const images = document.querySelectorAll('img');
+    // Add loading states for images (exclude header logo)
+    const images = document.querySelectorAll('img:not(.header-logo)');
     images.forEach(img => {
         img.addEventListener('load', function() {
             this.style.opacity = '1';
@@ -860,10 +871,18 @@ document.addEventListener('DOMContentLoaded', function() {
         with open(f"{self.output_dir}/js/main.js", 'w', encoding='utf-8') as f:
             f.write(js_content)
 
-    def get_header_html(self, title, description="Get help with Userology", is_root=True):
+    def get_header_html(self, title, description="Get help with Userology", is_root=True, include_search=True):
         """Get the common header HTML for all pages"""
         # Adjust paths based on whether we're in root or subdirectory
         path_prefix = "" if is_root else "../"
+        
+        # Search container only on root pages (index, categories, articles, videos)
+        search_html = ""
+        if include_search:
+            search_html = f"""
+                <div class="search-container">
+                    <input type="search" class="search-input" placeholder="Search articles..." id="searchInput">
+                </div>"""
         
         return f"""
 <!DOCTYPE html>
@@ -874,7 +893,6 @@ document.addEventListener('DOMContentLoaded', function() {
     <title>{title} - Userology Help Center</title>
     <link rel="stylesheet" href="{path_prefix}css/style.css">
     <link rel="icon" type="image/png" href="{path_prefix}logo.png">
-    <meta name="description" content="{description}">
 </head>
 <body>
     <header class="header">
@@ -886,10 +904,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <h1>Userology Help Center</h1>
                         <p>{description}</p>
                     </div>
-                </div>
-                <div class="search-container">
-                    <input type="search" class="search-input" placeholder="Search articles..." id="searchInput">
-                </div>
+                </div>{search_html}
             </div>
         </div>
     </header>
@@ -905,17 +920,16 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
     </nav>"""
 
-    def get_footer_html(self, is_root=True):
+    def get_footer_html(self, is_root=True, include_script=False):
         """Get the common footer HTML for all pages"""
         path_prefix = "" if is_root else "../"
+        script_tag = f'\n    <script src="{path_prefix}js/main.js"></script>' if include_script else ''
         return f"""
     <footer class="footer">
         <div class="container">
             <p>© 2025 Userology. All rights reserved.</p>
         </div>
-    </footer>
-    
-    <script src="{path_prefix}js/main.js"></script>
+    </footer>{script_tag}
 </body>
 </html>"""
 
@@ -995,9 +1009,16 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         </main>
     </div>
-"""
-        
-        html_content += self.get_footer_html(is_root=True)
+
+    <footer class="footer">
+        <div class="container">
+            <p>© 2025 Userology. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- <script src="js/main.js"></script> -->
+</body>
+</html>"""
         
         with open(f"{self.output_dir}/index.html", 'w', encoding='utf-8') as f:
             f.write(html_content)
@@ -1059,7 +1080,7 @@ document.addEventListener('DOMContentLoaded', function() {
         articles = self.articles_by_section.get(section['id'], [])
         category = next((c for c in self.categories if c['id'] == section['category_id']), None)
         
-        html_content = self.get_header_html(section['name'], "Your complete guide to using Userology", is_root=False)
+        html_content = self.get_header_html(section['name'], "Your complete guide to using Userology", is_root=False, include_search=False)
         
         html_content += f"""
     <div class="container">
@@ -1078,7 +1099,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             <div class="content">
                 <h1>{section['name']}</h1>
-                <p>{section.get('description', '')}</p>
+                
                 
                 <h2>Articles</h2>
                 <div class="article-list">
@@ -1099,9 +1120,14 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         </main>
     </div>
-"""
-        
-        html_content += self.get_footer_html(is_root=False)
+
+    <footer class="footer">
+        <div class="container">
+            <p>© 2025 Userology. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>"""
         
         with open(f"{self.output_dir}/sections/section_{section['id']}.html", 'w', encoding='utf-8') as f:
             f.write(html_content)
@@ -1111,21 +1137,10 @@ document.addEventListener('DOMContentLoaded', function() {
         section = next((s for s in self.sections if s['id'] == article['section_id']), None)
         category = next((c for c in self.categories if c['id'] == section['category_id']), None) if section else None
         
-        # Extract and download any missing attachments from HTML content
-        if article.get('body'):
-            print(f"Processing attachments for article: {article['title']}")
-            html_attachments = self.extract_attachments_from_html(article['body'], article['id'])
-            if html_attachments:
-                if 'downloaded_attachments' not in article:
-                    article['downloaded_attachments'] = []
-                article['downloaded_attachments'].extend(html_attachments)
+        # Use article body directly - it's already properly formatted from the HTML
+        article_body = article.get('body', '')
         
-        # Fix image URLs in content - need to adjust for articles subfolder
-        fixed_body = self.fix_image_urls(article['body'])
-        # Replace attachment paths to use ../ since we're in articles folder
-        fixed_body = fixed_body.replace('src="attachments/', 'src="../attachments/')
-        
-        html_content = self.get_header_html(article['title'], "Your complete guide to using Userology", is_root=False)
+        html_content = self.get_header_html(article['title'], "Your complete guide to using Userology", is_root=False, include_search=False)
         
         html_content += f"""
     <div class="container">
@@ -1153,14 +1168,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 
                 <div class="article-content">
-                    {fixed_body}
+                    {article_body}
                 </div>
             </div>
         </main>
     </div>
-"""
-        
-        html_content += self.get_footer_html(is_root=False)
+
+    <footer class="footer">
+        <div class="container">
+            <p>© 2025 Userology. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>"""
         
         with open(f"{self.output_dir}/articles/article_{article['id']}.html", 'w', encoding='utf-8') as f:
             f.write(html_content)
@@ -1191,6 +1211,97 @@ document.addEventListener('DOMContentLoaded', function() {
         print("Creating index pages...")
         self.create_categories_index()
         self.create_articles_index()
+        self.create_videos_page()
+
+    def create_videos_page(self):
+        """Create videos.html page with all video tutorials"""
+        import os
+        
+        # Get all video files from videos folder
+        videos_dir = "videos"
+        videos = []
+        
+        if os.path.exists(videos_dir):
+            video_files = [f for f in os.listdir(videos_dir) if f.endswith('.mp4')]
+            
+            # Video descriptions mapping
+            video_descriptions = {
+                'Creating your study on Userology.mp4': 'Learn how to create and set up a new study on the Userology platform.',
+                'AI Discussion Guides.mp4': 'Understand how AI-powered discussion guides enhance your usability testing.',
+                'AI Moderator Configuration.mp4': 'Configure the AI moderator settings for your research sessions.',
+                'AI Transcript.mp4': 'Learn how to access and utilize AI-generated transcripts from your sessions.',
+                'Ask AI Feature.mp4': 'Discover how to use the Ask AI feature to get insights from your research data.',
+                'Configuring Devices and Browsers.mp4': 'Set up device and browser requirements for your study participants.',
+                'Downloading and Creating Clips.mp4': 'Learn how to download recordings and create clips from your research sessions.',
+                'Duplicating a study on userology.mp4': 'Quickly duplicate an existing study to save time on setup.',
+                'External Recruitment.mp4': 'Learn how to recruit participants from external sources for your studies.',
+                'Launching Your Study and Recruiting Participants.mp4': 'Complete guide to launching your study and recruiting participants.',
+                'Live Product Section.mp4': 'Set up and configure the live product testing section in your study.',
+                'Managing Team and Inviting Members.mp4': 'Add and manage team members in your Userology organization.',
+                'Organization settings.mp4': 'Configure your organization settings and preferences.',
+                'Personalizing Your Study.mp4': 'Customize your study with branding and personalization options.',
+                'Preview Session.mp4': 'Preview how your study will appear to participants before launching.',
+                'Prototype Section.mp4': 'Set up prototype testing sections for your design research.',
+                'QnA results.mp4': 'Analyze and interpret Q&A results from your research sessions.',
+                'Recording permission settings.mp4': 'Configure recording permissions and privacy settings for your studies.',
+                'Recordings page.mp4': 'Navigate and manage all your session recordings in one place.',
+                'Recruit Participant Yourself.mp4': 'Learn how to recruit and invite your own participants to studies.',
+                'Sign In Feature.mp4': 'Set up sign-in requirements for your study participants.',
+                'Time estimation feature.mp4': 'Use the time estimation feature to plan your study duration.',
+                'Types of responses .mp4': 'Understand the different types of responses you can collect in your studies.',
+                'Understanding Quantitative Results .mp4': 'Learn how to analyze and interpret quantitative data from your research.',
+                'Uploading a Legal Document to Your Study.mp4': 'Add consent forms and legal documents to your study setup.',
+                'Usability score.mp4': 'Understand and interpret usability scores from your testing sessions.',
+                'Voice Interview Section.mp4': 'Set up and conduct voice interviews as part of your research studies.'
+            }
+            
+            for video_file in sorted(video_files):
+                video_name = os.path.splitext(video_file)[0]
+                videos.append({
+                    'filename': video_file,
+                    'title': video_name,
+                    'description': video_descriptions.get(video_file, '')
+                })
+        
+        html_content = self.get_header_html("Video Tutorials", "Watch video tutorials to learn how to use Userology", is_root=True)
+        
+        html_content += """
+    <div class="container">
+        <main class="main">
+            <div class="content">
+                <h1>Video Tutorials</h1>
+                <p>Watch step-by-step video guides to help you master Userology features. Click on any video to watch.</p>
+
+                <div class="video-grid">
+"""
+        
+        for video in videos:
+            html_content += f"""
+                    <div class="video-card">
+                        <div class="video-thumbnail">
+                            <video controls preload="metadata">
+                                <source src="videos/{video['filename']}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+                        <div class="video-info">
+                            <h3>{video['title']}</h3>
+                            <p class="video-description">{video['description']}</p>
+                        </div>
+                    </div>
+"""
+        
+        html_content += """
+                </div>
+            </div>
+        </main>
+    </div>
+"""
+        
+        html_content += self.get_footer_html(is_root=True, include_script=True)
+        
+        with open(f"{self.output_dir}/videos.html", 'w', encoding='utf-8') as f:
+            f.write(html_content)
 
     def create_categories_index(self):
         """Create Browse Topics index page with topic grid"""
@@ -1248,7 +1359,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 """
         
-        html_content += self.get_footer_html(is_root=True)
+        html_content += self.get_footer_html(is_root=True, include_script=True)
         
         with open(f"{self.output_dir}/categories.html", 'w', encoding='utf-8') as f:
             f.write(html_content)
@@ -1283,9 +1394,14 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         </main>
     </div>
-"""
-        
-        html_content += self.get_footer_html(is_root=True)
+
+    <footer class="footer">
+        <div class="container">
+            <p>Offline Help Center - Generated on """ + datetime.now().strftime('%Y-%m-%d %H:%M:%S') + """</p>
+        </div>
+    </footer>
+</body>
+</html>"""
         
         with open(f"{self.output_dir}/articles.html", 'w', encoding='utf-8') as f:
             f.write(html_content)
