@@ -12,9 +12,9 @@ from datetime import datetime
 
 class JSONReconstructor:
     def __init__(self):
-        self.sections_dir = "sections"
-        self.articles_dir = "articles"
-        self.categories_dir = "categories"
+        self.sections_dir = "offline_help_center/sections"
+        self.articles_dir = "offline_help_center/articles"
+        self.categories_dir = "offline_help_center/categories"
         self.output_dir = "zendesk_export_userology"
         
         # Create output directory
