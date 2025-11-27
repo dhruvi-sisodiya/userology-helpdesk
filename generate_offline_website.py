@@ -22,11 +22,15 @@ class OfflineWebsiteGenerator:
         self.articles = self.load_json("articles.json")
         self.manifest = self.load_json("manifest.json")
         
-        # Create output directory
+        # Create output directory with organized structure
         os.makedirs(self.output_dir, exist_ok=True)
         os.makedirs(f"{self.output_dir}/css", exist_ok=True)
         os.makedirs(f"{self.output_dir}/js", exist_ok=True)
         os.makedirs(f"{self.output_dir}/attachments", exist_ok=True)
+        os.makedirs(f"{self.output_dir}/sections", exist_ok=True)
+        os.makedirs(f"{self.output_dir}/articles", exist_ok=True)
+        os.makedirs(f"{self.output_dir}/categories", exist_ok=True)
+        os.makedirs(f"{self.output_dir}/videos", exist_ok=True)
         
         # Set up session for downloading
         import requests
@@ -856,8 +860,11 @@ document.addEventListener('DOMContentLoaded', function() {
         with open(f"{self.output_dir}/js/main.js", 'w', encoding='utf-8') as f:
             f.write(js_content)
 
-    def get_header_html(self, title, description="Get help with Userology"):
+    def get_header_html(self, title, description="Get help with Userology", is_root=True):
         """Get the common header HTML for all pages"""
+        # Adjust paths based on whether we're in root or subdirectory
+        path_prefix = "" if is_root else "../"
+        
         return f"""
 <!DOCTYPE html>
 <html lang="en">
@@ -865,17 +872,20 @@ document.addEventListener('DOMContentLoaded', function() {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{title} - Userology Help Center</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="stylesheet" href="{path_prefix}css/style.css">
+    <link rel="icon" type="image/png" href="{path_prefix}logo.png">
     <meta name="description" content="{description}">
 </head>
 <body>
     <header class="header">
         <div class="container">
             <div class="header-content">
-                <div>
-                    <h1>Userology Help Center</h1>
-                    <p>{description}</p>
+                <div class="header-branding">
+                    <img src="{path_prefix}logo.png" alt="Userology Logo" class="header-logo">
+                    <div class="header-text">
+                        <h1>Userology Help Center</h1>
+                        <p>{description}</p>
+                    </div>
                 </div>
                 <div class="search-container">
                     <input type="search" class="search-input" placeholder="Search articles..." id="searchInput">
@@ -887,15 +897,17 @@ document.addEventListener('DOMContentLoaded', function() {
     <nav class="nav">
         <div class="container">
             <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="categories.html">Categories</a></li>
-                <li><a href="articles.html">All Articles</a></li>
+                <li><a href="{path_prefix}index.html">Home</a></li>
+                <li><a href="{path_prefix}categories.html">Browse Topics</a></li>
+                <li><a href="{path_prefix}articles.html">All Articles</a></li>
+                <li><a href="{path_prefix}videos.html">Videos</a></li>
             </ul>
         </div>
     </nav>"""
 
-    def get_footer_html(self):
+    def get_footer_html(self, is_root=True):
         """Get the common footer HTML for all pages"""
+        path_prefix = "" if is_root else "../"
         return f"""
     <footer class="footer">
         <div class="container">
@@ -903,33 +915,63 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
     </footer>
     
-    <script src="js/main.js"></script>
+    <script src="{path_prefix}js/main.js"></script>
 </body>
 </html>"""
 
     def create_homepage(self):
-        """Create the main homepage"""
-        html_content = self.get_header_html("Home", "Get help with Userology")
+        """Create the main homepage with Browse by Topic section"""
+        html_content = self.get_header_html("Home", "Get help with Userology", is_root=True)
         
         html_content += """
     <div class="container">
         <main class="main">
-            <aside class="sidebar">
-                <h3>Categories</h3>
-                <ul>
-"""
-        
-        for category in self.categories:
-            html_content += f'                    <li><a href="category_{category["id"]}.html">{category["name"]}</a></li>\n'
-        
-        html_content += """
-                </ul>
-            </aside>
-
             <div class="content">
                 <h1>Welcome to Userology Help Center</h1>
                 <p>Find comprehensive guides, tutorials, and answers to help you get the most out of Userology.</p>
-                
+
+                <h2>Browse by Topic</h2>
+                <div class="topic-grid">
+"""
+        
+        # Create topic cards for sections
+        section_icons = {
+            'Study Setup': '📝',
+            'Interview Plan': '💬',
+            'Study Settings': '⚙️',
+            'Launch': '🚀',
+            'Responses and Recordings': '🎥',
+            'Settings and Admin': '👥',
+            'Results and Reports': '📊'
+        }
+        
+        section_descriptions = {
+            'Study Setup': 'Learn how to create and configure your research studies',
+            'Interview Plan': 'Set up discussion guides and interview sections',
+            'Study Settings': 'Configure AI moderator, devices, permissions, and more',
+            'Launch': 'Recruit participants and preview your study',
+            'Responses and Recordings': 'Manage recordings, clips, and participant responses',
+            'Settings and Admin': 'Manage your team and organization settings',
+            'Results and Reports': 'Analyze qualitative and quantitative research data'
+        }
+        
+        for section in self.sections:
+            articles_count = len(self.articles_by_section.get(section['id'], []))
+            icon = section_icons.get(section['name'], '📄')
+            description = section_descriptions.get(section['name'], section.get('description', ''))
+            
+            html_content += f"""
+                    <a href="sections/section_{section['id']}.html" class="topic-card">
+                        <div class="topic-icon">{icon}</div>
+                        <h3>{section['name']}</h3>
+                        <p class="topic-description">{description}</p>
+                        <div class="topic-meta">{articles_count} {'article' if articles_count == 1 else 'articles'}</div>
+                    </a>
+"""
+        
+        html_content += """
+                </div>
+
                 <h2>Popular Articles</h2>
                 <div class="article-grid">
 """
@@ -938,13 +980,12 @@ document.addEventListener('DOMContentLoaded', function() {
         recent_articles = sorted(self.articles, key=lambda x: x['updated_at'], reverse=True)[:6]
         for article in recent_articles:
             section = next((s for s in self.sections if s['id'] == article['section_id']), None)
-            category = next((c for c in self.categories if c['id'] == section['category_id']), None) if section else None
             
             html_content += f"""
-                    <a href="article_{article['id']}.html" class="article-card">
+                    <a href="articles/article_{article['id']}.html" class="article-card">
                         <h3>{article['title']}</h3>
                         <div class="article-meta">
-                            {category['name'] if category else 'Unknown'} → {section['name'] if section else 'Unknown'}
+                            {section['name'] if section else 'Unknown'}
                         </div>
                     </a>
 """
@@ -956,42 +997,18 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 """
         
-        html_content += self.get_footer_html()
+        html_content += self.get_footer_html(is_root=True)
         
         with open(f"{self.output_dir}/index.html", 'w', encoding='utf-8') as f:
             f.write(html_content)
 
     def create_category_page(self, category):
-        """Create a category page"""
+        """Create a category page in categories folder"""
         sections = self.sections_by_category.get(category['id'], [])
         
-        html_content = f"""
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{category['name']} - Userology Help Center</title>
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-    <header class="header">
-        <div class="container">
-            <h1>Userology Help Center</h1>
-            <p>Your complete guide to using Userology</p>
-        </div>
-    </header>
-
-    <nav class="nav">
-        <div class="container">
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="categories.html">All Categories</a></li>
-                <li><a href="articles.html">All Articles</a></li>
-            </ul>
-        </div>
-    </nav>
-
+        html_content = self.get_header_html(category['name'], "Browse help topics organized by category", is_root=False)
+        
+        html_content += f"""
     <div class="container">
         <main class="main">
             <aside class="sidebar">
@@ -1000,7 +1017,7 @@ document.addEventListener('DOMContentLoaded', function() {
 """
         
         for section in sections:
-            html_content += f'                    <li><a href="section_{section["id"]}.html">{section["name"]}</a></li>\n'
+            html_content += f'                    <li><a href="../sections/section_{section["id"]}.html">{section["name"]}</a></li>\n'
         
         html_content += f"""
                 </ul>
@@ -1018,7 +1035,7 @@ document.addEventListener('DOMContentLoaded', function() {
             articles = self.articles_by_section.get(section['id'], [])
             html_content += f"""
                     <div class="article-item">
-                        <h3><a href="section_{section['id']}.html">{section['name']}</a></h3>
+                        <h3><a href="../sections/section_{section['id']}.html">{section['name']}</a></h3>
                         <div class="article-meta">
                             {len(articles)} articles
                         </div>
@@ -1030,51 +1047,21 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         </main>
     </div>
-
-    <footer class="footer">
-        <div class="container">
-            <p>Offline Help Center - Generated on """ + datetime.now().strftime('%Y-%m-%d %H:%M:%S') + """</p>
-        </div>
-    </footer>
-</body>
-</html>
 """
         
-        with open(f"{self.output_dir}/category_{category['id']}.html", 'w', encoding='utf-8') as f:
+        html_content += self.get_footer_html(is_root=False)
+        
+        with open(f"{self.output_dir}/categories/category_{category['id']}.html", 'w', encoding='utf-8') as f:
             f.write(html_content)
 
     def create_section_page(self, section):
-        """Create a section page"""
+        """Create a section page in sections folder"""
         articles = self.articles_by_section.get(section['id'], [])
         category = next((c for c in self.categories if c['id'] == section['category_id']), None)
         
-        html_content = f"""
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{section['name']} - Userology Help Center</title>
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-    <header class="header">
-        <div class="container">
-            <h1>Userology Help Center</h1>
-            <p>Your complete guide to using Userology</p>
-        </div>
-    </header>
-
-    <nav class="nav">
-        <div class="container">
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="categories.html">All Categories</a></li>
-                <li><a href="articles.html">All Articles</a></li>
-            </ul>
-        </div>
-    </nav>
-
+        html_content = self.get_header_html(section['name'], "Your complete guide to using Userology", is_root=False)
+        
+        html_content += f"""
     <div class="container">
         <main class="main">
             <aside class="sidebar">
@@ -1083,7 +1070,7 @@ document.addEventListener('DOMContentLoaded', function() {
 """
         
         for article in articles:
-            html_content += f'                    <li><a href="article_{article["id"]}.html">{article["title"]}</a></li>\n'
+            html_content += f'                    <li><a href="../articles/article_{article["id"]}.html">{article["title"]}</a></li>\n'
         
         html_content += f"""
                 </ul>
@@ -1100,7 +1087,7 @@ document.addEventListener('DOMContentLoaded', function() {
         for article in articles:
             html_content += f"""
                     <div class="article-item">
-                        <h3><a href="article_{article['id']}.html">{article['title']}</a></h3>
+                        <h3><a href="../articles/article_{article['id']}.html">{article['title']}</a></h3>
                         <div class="article-meta">
                             Updated: {article['updated_at'][:10]}
                         </div>
@@ -1112,21 +1099,15 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         </main>
     </div>
-
-    <footer class="footer">
-        <div class="container">
-            <p>Offline Help Center - Generated on """ + datetime.now().strftime('%Y-%m-%d %H:%M:%S') + """</p>
-        </div>
-    </footer>
-</body>
-</html>
 """
         
-        with open(f"{self.output_dir}/section_{section['id']}.html", 'w', encoding='utf-8') as f:
+        html_content += self.get_footer_html(is_root=False)
+        
+        with open(f"{self.output_dir}/sections/section_{section['id']}.html", 'w', encoding='utf-8') as f:
             f.write(html_content)
 
     def create_article_page(self, article):
-        """Create an article page"""
+        """Create an article page in articles folder"""
         section = next((s for s in self.sections if s['id'] == article['section_id']), None)
         category = next((c for c in self.categories if c['id'] == section['category_id']), None) if section else None
         
@@ -1139,48 +1120,26 @@ document.addEventListener('DOMContentLoaded', function() {
                     article['downloaded_attachments'] = []
                 article['downloaded_attachments'].extend(html_attachments)
         
-        # Fix image URLs in content
+        # Fix image URLs in content - need to adjust for articles subfolder
         fixed_body = self.fix_image_urls(article['body'])
+        # Replace attachment paths to use ../ since we're in articles folder
+        fixed_body = fixed_body.replace('src="attachments/', 'src="../attachments/')
         
-        html_content = f"""
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{article['title']} - Userology Help Center</title>
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-    <header class="header">
-        <div class="container">
-            <h1>Userology Help Center</h1>
-            <p>Your complete guide to using Userology</p>
-        </div>
-    </header>
-
-    <nav class="nav">
-        <div class="container">
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="categories.html">All Categories</a></li>
-                <li><a href="articles.html">All Articles</a></li>
-            </ul>
-        </div>
-    </nav>
-
+        html_content = self.get_header_html(article['title'], "Your complete guide to using Userology", is_root=False)
+        
+        html_content += f"""
     <div class="container">
         <main class="main">
             <aside class="sidebar">
                 <h3>Navigation</h3>
                 <ul>
-                    <li><a href="index.html">← Back to Home</a></li>
+                    <li><a href="../index.html">← Back to Home</a></li>
 """
         
         if category:
-            html_content += f'                    <li><a href="category_{category["id"]}.html">← {category["name"]}</a></li>\n'
+            html_content += f'                    <li><a href="../categories/category_{category["id"]}.html">← {category["name"]}</a></li>\n'
         if section:
-            html_content += f'                    <li><a href="section_{section["id"]}.html">← {section["name"]}</a></li>\n'
+            html_content += f'                    <li><a href="../sections/section_{section["id"]}.html">← {section["name"]}</a></li>\n'
         
         html_content += f"""
                 </ul>
@@ -1199,17 +1158,11 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         </main>
     </div>
-
-    <footer class="footer">
-        <div class="container">
-            <p>Offline Help Center - Generated on """ + datetime.now().strftime('%Y-%m-%d %H:%M:%S') + """</p>
-        </div>
-    </footer>
-</body>
-</html>
 """
         
-        with open(f"{self.output_dir}/article_{article['id']}.html", 'w', encoding='utf-8') as f:
+        html_content += self.get_footer_html(is_root=False)
+        
+        with open(f"{self.output_dir}/articles/article_{article['id']}.html", 'w', encoding='utf-8') as f:
             f.write(html_content)
 
     def create_all_pages(self):
@@ -1240,30 +1193,51 @@ document.addEventListener('DOMContentLoaded', function() {
         self.create_articles_index()
 
     def create_categories_index(self):
-        """Create categories index page"""
-        html_content = self.get_header_html("Categories", "Browse all help categories")
+        """Create Browse Topics index page with topic grid"""
+        html_content = self.get_header_html("Browse Topics", "Browse help topics organized by category", is_root=True)
         
         html_content += """
     <div class="container">
         <main class="main">
             <div class="content">
-                <h1>All Categories</h1>
-                <div class="article-grid">
+                <h1>Browse Topics</h1>
+                <p>Find articles organized by topic to help you get started quickly.</p>
+
+                <div class="topic-grid">
 """
         
-        for category in self.categories:
-            sections = self.sections_by_category.get(category['id'], [])
-            total_articles = sum(len(self.articles_by_section.get(s['id'], [])) for s in sections)
+        # Create topic cards for sections
+        section_icons = {
+            'Study Setup': '📝',
+            'Interview Plan': '💬',
+            'Study Settings': '⚙️',
+            'Launch': '🚀',
+            'Responses and Recordings': '🎥',
+            'Settings and Admin': '👥',
+            'Results and Reports': '📊'
+        }
+        
+        section_descriptions = {
+            'Study Setup': 'Learn how to create and configure your research studies',
+            'Interview Plan': 'Set up discussion guides and interview sections',
+            'Study Settings': 'Configure AI moderator, devices, permissions, and more',
+            'Launch': 'Recruit participants and preview your study',
+            'Responses and Recordings': 'Manage recordings, clips, and participant responses',
+            'Settings and Admin': 'Manage your team and organization settings',
+            'Results and Reports': 'Analyze qualitative and quantitative research data'
+        }
+        
+        for section in self.sections:
+            articles_count = len(self.articles_by_section.get(section['id'], []))
+            icon = section_icons.get(section['name'], '📄')
+            description = section_descriptions.get(section['name'], section.get('description', ''))
             
             html_content += f"""
-                    <a href="category_{category['id']}.html" class="article-card">
-                        <h3>{category['name']}</h3>
-                        <div class="article-meta">
-                            {len(sections)} sections, {total_articles} articles
-                        </div>
-                        <div class="article-excerpt">
-                            {category.get('description', 'Browse articles in this category')}
-                        </div>
+                    <a href="sections/section_{section['id']}.html" class="topic-card">
+                        <div class="topic-icon">{icon}</div>
+                        <h3>{section['name']}</h3>
+                        <p class="topic-description">{description}</p>
+                        <div class="topic-meta">{articles_count} {'article' if articles_count == 1 else 'articles'}</div>
                     </a>
 """
         
@@ -1272,22 +1246,16 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         </main>
     </div>
-
-    <footer class="footer">
-        <div class="container">
-            <p>Offline Help Center - Generated on """ + datetime.now().strftime('%Y-%m-%d %H:%M:%S') + """</p>
-        </div>
-    </footer>
-</body>
-</html>
 """
+        
+        html_content += self.get_footer_html(is_root=True)
         
         with open(f"{self.output_dir}/categories.html", 'w', encoding='utf-8') as f:
             f.write(html_content)
 
     def create_articles_index(self):
         """Create articles index page"""
-        html_content = self.get_header_html("All Articles", "Browse all help articles")
+        html_content = self.get_header_html("All Articles", "Browse all help articles", is_root=True)
         
         html_content += """
     <div class="container">
@@ -1302,7 +1270,7 @@ document.addEventListener('DOMContentLoaded', function() {
             category = next((c for c in self.categories if c['id'] == section['category_id']), None) if section else None
             
             html_content += f"""
-                    <a href="article_{article['id']}.html" class="article-card">
+                    <a href="articles/article_{article['id']}.html" class="article-card">
                         <h3>{article['title']}</h3>
                         <div class="article-meta">
                             {category['name'] if category else 'Unknown'} → {section['name'] if section else 'Unknown'}
@@ -1315,15 +1283,9 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         </main>
     </div>
-
-    <footer class="footer">
-        <div class="container">
-            <p>Offline Help Center - Generated on """ + datetime.now().strftime('%Y-%m-%d %H:%M:%S') + """</p>
-        </div>
-    </footer>
-</body>
-</html>
 """
+        
+        html_content += self.get_footer_html(is_root=True)
         
         with open(f"{self.output_dir}/articles.html", 'w', encoding='utf-8') as f:
             f.write(html_content)
