@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+        input { width: 100%; padding: 10px; font-size: 16px; margin: 10px 0; }
+        .result { padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; }
+        .debug { background: #f0f0f0; padding: 10px; margin: 10px 0; font-family: monospace; font-size: 12px; }
+        mark { background: yellow; padding: 2px; }
+    </style>
+</head>
+<body>
+    <h1>Search Test</h1>
+    <div class="debug" id="status">Loading...</div>
+    <input type="text" id="searchInput" placeholder="Type to search (e.g., 'study', 'AI', 'prototype')">
+    <div id="results"></div>
+
+    <script>
+        let searchIndex = [];
+        const statusDiv = document.getElementById('status');
+        const resultsDiv = document.getElementById('results');
+        const searchInput = document.getElementById('searchInput');
+
+        // Load search index
+        fetch('search-index.json')
+            .then(response => {
+                statusDiv.textContent = `Response status: ${response.status}`;
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                searchIndex = data;
+                statusDiv.textContent = `✅ Loaded ${searchIndex.length} articles`;
+                statusDiv.style.background = '#d4edda';
+            })
+            .catch(err => {
+                statusDiv.textContent = `❌ Error: ${err.message}`;
+                statusDiv.style.background = '#f8d7da';
+            });
+
+        // Search function
+        function search(query) {
+            if (!query || query.length < 2) {
+                resultsDiv.innerHTML = '';
+                return;
+            }
+
+            const queryLower = query.toLowerCase();
+            const results = searchIndex.filter(item => {
+                return item.title.toLowerCase().includes(queryLower) ||
+                       item.section.toLowerCase().includes(queryLower) ||
+                       (item.searchText || '').toLowerCase().includes(queryLower);
+            }).slice(0, 10);
+
+            if (results.length === 0) {
+                resultsDiv.innerHTML = '<div class="result">No results found</div>';
+                return;
+            }
+
+            resultsDiv.innerHTML = results.map(r => `
+                <div class="result">
+                    <strong>${r.title}</strong><br>
+                    <small>${r.section}</small><br>
+                    <a href="${r.url}" target="_blank">View article</a>
+                </div>
+            `).join('');
+        }
+
+        searchInput.addEventListener('input', (e) => {
+            search(e.target.value);
+        });
+    </script>
+</body>
+</html>

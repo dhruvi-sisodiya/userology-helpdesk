@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results - Userology Help Center</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/png" href="logo.png">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="header-branding">
+                    <img src="logo.png" alt="Userology Logo" class="header-logo">
+                    <div class="header-text">
+                        <h1>Userology Help Center</h1>
+                        <p>Search Results</p>
+                    </div>
+                </div>
+                <div class="search-container">
+                    <form id="searchForm">
+                        <input type="search" class="search-input" placeholder="Search articles..." id="searchInput" autofocus>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <nav class="nav">
+        <div class="container">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="categories.html">Browse Topics</a></li>
+                <li><a href="articles.html">All Articles</a></li>
+                <li><a href="videos.html">Videos</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <main class="main">
+            <div class="content">
+                <div class="search-page-header">
+                    <h1>Search Results</h1>
+                    <div id="searchInfo" class="search-count"></div>
+                </div>
+                
+                <div id="searchResults" class="search-results-grid">
+                    <!-- Results will be inserted here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>© 2025 Userology. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        let searchIndex = [];
+
+        // Load search index
+        fetch('search-index.json')
+            .then(response => response.json())
+            .then(data => {
+                searchIndex = data;
+                performPageSearch();
+            })
+            .catch(err => {
+                console.error('Failed to load search index:', err);
+                document.getElementById('searchResults').innerHTML = 
+                    '<div class="search-no-results">Failed to load search index. Please try again.</div>';
+            });
+
+        // Get query from URL
+        function getSearchQuery() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('q') || '';
+        }
+
+        // Search scoring function
+        function scoreMatch(item, query) {
+            const queryLower = query.toLowerCase();
+            const queryWords = queryLower.split(/\\s+/).filter(w => w.length > 1);
+            let score = 0;
+            
+            // Title exact match (highest priority)
+            if (item.title.toLowerCase().includes(queryLower)) {
+                score += 100;
+            }
+            
+            // Title word matches
+            queryWords.forEach(word => {
+                if (item.title.toLowerCase().includes(word)) {
+                    score += 50;
+                }
+            });
+            
+            // Section match
+            if (item.section.toLowerCase().includes(queryLower)) {
+                score += 30;
+            }
+            
+            // Content matches
+            const searchText = item.searchText || '';
+            queryWords.forEach(word => {
+                const regex = new RegExp(word, 'gi');
+                const matches = (searchText.match(regex) || []).length;
+                score += matches * 5;
+            });
+            
+            return score;
+        }
+
+        // Highlight matching text
+        function highlightText(text, query) {
+            if (!query) return text;
+            const queryWords = query.split(/\\s+/).filter(w => w.length > 1);
+            let highlighted = text;
+            
+            queryWords.forEach(word => {
+                const regex = new RegExp(`(${word})`, 'gi');
+                highlighted = highlighted.replace(regex, '<mark>$1</mark>');
+            });
+            
+            return highlighted;
+        }
+
+        // Perform search and display results
+        function performPageSearch() {
+            const query = getSearchQuery();
+            const searchInput = document.getElementById('searchInput');
+            const searchInfo = document.getElementById('searchInfo');
+            const searchResults = document.getElementById('searchResults');
+            
+            if (searchInput) {
+                searchInput.value = query;
+            }
+            
+            if (!query || query.length < 2) {
+                searchInfo.textContent = 'Please enter a search query (minimum 2 characters)';
+                searchResults.innerHTML = '';
+                return;
+            }
+            
+            // Score and filter results
+            const results = searchIndex
+                .map(item => ({
+                    ...item,
+                    score: scoreMatch(item, query)
+                }))
+                .filter(item => item.score > 0)
+                .sort((a, b) => b.score - a.score);
+            
+            // Update search info
+            const resultCount = results.length;
+            searchInfo.innerHTML = `Found <strong>${resultCount}</strong> result${resultCount !== 1 ? 's' : ''} for <span class="search-query-text">"${query}"</span>`;
+            
+            // Display results
+            if (results.length === 0) {
+                searchResults.innerHTML = `
+                    <div class="search-no-results">
+                        <p>No results found for "${query}"</p>
+                        <p style="margin-top: 1rem; color: var(--color-text-light);">Try different keywords or browse our <a href="categories.html">topics</a></p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            results.forEach(result => {
+                const highlightedTitle = highlightText(result.title, query);
+                const excerpt = result.content.substring(0, 200) + '...';
+                const highlightedExcerpt = highlightText(excerpt, query);
+                
+                html += `
+                    <div class="search-result-card">
+                        <h3><a href="${result.url}">${highlightedTitle}</a></h3>
+                        <div class="search-result-meta">
+                            ${result.section}
+                            ${result.updated ? ` • Updated: ${result.updated}` : ''}
+                        </div>
+                        <div class="search-result-excerpt">${highlightedExcerpt}</div>
+                    </div>
+                `;
+            });
+            
+            searchResults.innerHTML = html;
+        }
+
+        // Handle form submission
+        document.getElementById('searchForm')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const query = document.getElementById('searchInput').value.trim();
+            if (query) {
+                window.location.href = `search.html?q=${encodeURIComponent(query)}`;
+            }
+        });
+    </script>
+    <script src="js/main.js"></script>
+</body>
+</html>

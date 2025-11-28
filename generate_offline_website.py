@@ -881,7 +881,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if include_search:
             search_html = f"""
                 <div class="search-container">
-                    <input type="search" class="search-input" placeholder="Search articles..." id="searchInput">
+                    <form id="searchForm">
+                        <input type="search" class="search-input" placeholder="Search articles..." id="searchInput">
+                    </form>
                 </div>"""
         
         return f"""
@@ -1016,7 +1018,7 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
     </footer>
 
-    <!-- <script src="js/main.js"></script> -->
+    <script src="js/main.js"></script>
 </body>
 </html>"""
         
@@ -1400,6 +1402,8 @@ document.addEventListener('DOMContentLoaded', function() {
             <p>Offline Help Center - Generated on """ + datetime.now().strftime('%Y-%m-%d %H:%M:%S') + """</p>
         </div>
     </footer>
+
+    <script src="js/main.js"></script>
 </body>
 </html>"""
         
