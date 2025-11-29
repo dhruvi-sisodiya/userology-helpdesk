@@ -726,7 +726,16 @@ a {
     .header-content {
         flex-direction: column;
         align-items: stretch;
-        gap: var(--space-4);
+        gap: var(--space-3);
+    }
+
+    .header-text h1 {
+        font-size: 1rem;
+    }
+
+    .header-logo {
+        width: 28px;
+        height: 28px;
     }
 
     .search-container {
@@ -734,46 +743,109 @@ a {
     }
 
     .nav ul {
-        flex-direction: column;
+        flex-direction: row;
         gap: 0;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .nav a {
-        border-bottom: none;
-        border-left: 2px solid transparent;
+        font-size: 0.875rem;
+        padding: var(--space-3) var(--space-4);
+        white-space: nowrap;
     }
 
-    .nav a.active {
-        border-left-color: var(--color-primary);
-    }
-
-    .content {
-        padding: var(--space-6);
-    }
-
-    .content h1 {
-        font-size: 1.75rem;
-    }
-
-    .article-grid,
-    .main:has(.sidebar) .article-grid,
-    .main:not(:has(.sidebar)) .article-grid {
-        grid-template-columns: 1fr;
-        gap: var(--space-5);
-    }
-
-    .main:not(:has(.sidebar)) .content {
-        padding: var(--space-6);
-    }
-}
-
-@media (max-width: 480px) {
     .content {
         padding: var(--space-5);
     }
 
     .content h1 {
         font-size: 1.5rem;
+    }
+
+    .content h2 {
+        font-size: 1.25rem;
+    }
+
+    .content h3 {
+        font-size: 1.125rem;
+    }
+
+    .article-grid,
+    .main:has(.sidebar) .article-grid,
+    .main:not(:has(.sidebar)) .article-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-4);
+    }
+
+    .main:not(:has(.sidebar)) .content {
+        padding: var(--space-5);
+    }
+
+    .article-card {
+        padding: var(--space-5);
+        min-height: 120px;
+    }
+
+    .article-card h3 {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0 var(--space-3);
+    }
+
+    .header {
+        padding: var(--space-3) 0;
+    }
+
+    .header-branding {
+        gap: var(--space-3);
+    }
+
+    .header-text h1 {
+        font-size: 0.9375rem;
+    }
+
+    .header-logo {
+        width: 24px;
+        height: 24px;
+    }
+
+    .nav a {
+        font-size: 0.8125rem;
+        padding: var(--space-2) var(--space-3);
+    }
+
+    .content {
+        padding: var(--space-4);
+    }
+
+    .content h1 {
+        font-size: 1.375rem;
+    }
+
+    .content h2 {
+        font-size: 1.125rem;
+    }
+
+    .content h3 {
+        font-size: 1rem;
+    }
+
+    .article-card {
+        padding: var(--space-4);
+        min-height: 100px;
+    }
+
+    .article-card h3 {
+        font-size: 0.9375rem;
+    }
+
+    .article-meta {
+        font-size: 0.8125rem;
     }
 }
 
@@ -1320,23 +1392,72 @@ a {
     .topic-grid,
     .topic-grid-home {
         grid-template-columns: 1fr;
-        gap: var(--space-5);
+        gap: var(--space-4);
+    }
+    
+    .topic-card {
+        padding: var(--space-5);
+        min-height: 150px;
+    }
+
+    .topic-icon {
+        font-size: 2.5rem;
+        margin-bottom: var(--space-3);
+    }
+
+    .topic-card h3 {
+        font-size: 1rem;
+    }
+
+    .topic-meta {
+        font-size: 0.75rem;
     }
     
     .hero-title {
-        font-size: 2rem;
+        font-size: 1.75rem;
+        margin-bottom: var(--space-3);
+    }
+
+    .hero-description {
+        font-size: 0.9375rem;
+        margin-bottom: var(--space-6);
     }
     
     .hero-section {
-        padding: var(--space-12) 0;
+        padding: var(--space-8) 0 var(--space-10) 0;
     }
     
     .hero-search form {
         flex-direction: column;
+        padding: var(--space-2);
+    }
+
+    .hero-search-input {
+        padding: var(--space-3) var(--space-4);
+        font-size: 0.9375rem;
     }
     
     .hero-search-button {
         width: 100%;
+        padding: var(--space-3) var(--space-6);
+        font-size: 0.9375rem;
+    }
+
+    .popular-articles-section h2,
+    .video-carousel-section h2 {
+        font-size: 1.5rem;
+    }
+
+    .video-carousel-card {
+        min-height: auto;
+    }
+
+    .video-carousel-info h4 {
+        font-size: 0.9375rem;
+    }
+
+    .video-carousel-info p {
+        font-size: 0.8125rem;
     }
 }
 
