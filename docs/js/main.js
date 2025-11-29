@@ -357,6 +357,10 @@ function initHeaderScroll() {
     const header = document.querySelector('.header');
     if (!header) return;
     
+    const hasScrollNav = document.body.classList.contains('home-page') ||
+                        document.body.classList.contains('videos-page') ||
+                        document.body.classList.contains('articles-page') ||
+                        document.body.classList.contains('categories-page');
     let lastScroll = 0;
     
     window.addEventListener('scroll', () => {
@@ -364,8 +368,14 @@ function initHeaderScroll() {
         
         if (currentScroll > 50) {
             header.classList.add('scrolled');
+            if (hasScrollNav) {
+                document.body.classList.add('scrolled');
+            }
         } else {
             header.classList.remove('scrolled');
+            if (hasScrollNav) {
+                document.body.classList.remove('scrolled');
+            }
         }
         
         lastScroll = currentScroll;
