@@ -9,46 +9,38 @@ let searchIndexLoaded = false;
 function getBasePath() {
     const path = window.location.pathname;
     
-    // For GitHub Pages: extract the repository base path
-    // e.g., /userology-helpdesk/ from /userology-helpdesk/index.html
-    const pathParts = path.split('/').filter(Boolean);
-    
-    // If we're in sections/ or articles/ subdirectory, go up one level
-    const currentFile = pathParts[pathParts.length - 1];
+    // If we're in sections/ or articles/ subdirectory, use relative path
     if (path.includes('/sections/') || path.includes('/articles/') || path.includes('/categories/')) {
-        // Get the base repository path and add ../
-        const repoBase = '/' + pathParts.slice(0, pathParts.length - 2).join('/') + '/';
-        return repoBase === '//' ? '../' : '../';
+        return '../';
     }
     
-    // For root level pages (index.html, articles.html, etc.)
-    // If hosted on GitHub Pages with repo name in path
-    if (pathParts.length > 0 && !currentFile.endsWith('.html')) {
-        // We have a base path like /userology-helpdesk/
-        return '/' + pathParts[0] + '/';
-    }
-    
-    // Check if we're on GitHub Pages by looking at hostname
+    // For root pages, check if we're on GitHub Pages
     if (window.location.hostname.includes('github.io')) {
-        // GitHub Pages format: username.github.io/repo-name/
-        if (pathParts.length > 0) {
+        // GitHub Pages: use absolute path with repo name
+        // Extract repo name from path: /userology-helpdesk/index.html -> /userology-helpdesk/
+        const pathParts = path.split('/').filter(Boolean);
+        if (pathParts.length > 0 && pathParts[0] !== 'index.html') {
+            // First part is the repo name
             return '/' + pathParts[0] + '/';
         }
     }
     
-    // Default for local or root hosting
-    return './';
+    // For local hosting, use relative path
+    return '';
 }
 
 const basePath = getBasePath();
 console.log('🔍 Base path for search:', basePath);
+console.log('🌐 Hostname:', window.location.hostname);
+console.log('📍 Pathname:', window.location.pathname);
 
 // Load search index with better error handling
 const searchIndexUrl = basePath + 'search-index.json';
-console.log('📂 Loading search index from:', searchIndexUrl);
+console.log('📂 Attempting to load from:', searchIndexUrl);
 
 fetch(searchIndexUrl)
     .then(response => {
+        console.log('📡 Fetch response status:', response.status);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -57,14 +49,12 @@ fetch(searchIndexUrl)
     .then(data => {
         searchIndex = data;
         searchIndexLoaded = true;
-        console.log(`✅ Search index loaded: ${searchIndex.length} articles`);
+        console.log(`✅ Search index loaded successfully: ${searchIndex.length} articles`);
     })
     .catch(err => {
         console.error('❌ Failed to load search index:', err);
-        console.log('📍 Path attempted:', searchIndexUrl);
-        console.log('📍 Current location:', window.location.href);
-        console.log('📍 Hostname:', window.location.hostname);
-        console.log('📍 Pathname:', window.location.pathname);
+        console.log('📍 Tried loading from:', searchIndexUrl);
+        console.log('📍 Full URL would be:', window.location.origin + searchIndexUrl);
     });
 
 // Search scoring function
