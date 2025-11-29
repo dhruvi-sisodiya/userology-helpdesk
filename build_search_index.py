@@ -61,12 +61,12 @@ def build_search_index():
         
         search_index.append(search_entry)
     
-    # Save search index
-    with open('offline_help_center/search-index.json', 'w', encoding='utf-8') as f:
+    # Save search index to docs directory
+    with open('docs/search-index.json', 'w', encoding='utf-8') as f:
         json.dump(search_index, f, indent=2, ensure_ascii=False)
     
     print(f"✅ Search index created with {len(search_index)} articles")
-    print(f"📁 Saved to: offline_help_center/search-index.json")
+    print(f"📁 Saved to: docs/search-index.json")
 
 if __name__ == "__main__":
     build_search_index()

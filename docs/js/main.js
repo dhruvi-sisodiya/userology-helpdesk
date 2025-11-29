@@ -8,17 +8,26 @@ let searchIndexLoaded = false;
 // Determine the base path for loading resources
 function getBasePath() {
     const path = window.location.pathname;
-    const depth = (path.match(/\//g) || []).length - 1;
     
-    if (path.includes('/sections/') || path.includes('/articles/')) {
+    // Check if we're in a subdirectory (sections/ or articles/)
+    if (path.includes('/sections/') || path.includes('/articles/') || path.includes('/categories/')) {
         return '../';
     }
+    
+    // For GitHub Pages or other subdirectory hosting
+    // Extract the base path from the current location
+    const segments = path.split('/').filter(Boolean);
+    if (segments.length > 1 && !path.endsWith('.html')) {
+        // We're in a subdirectory, go up one level
+        return '../';
+    }
+    
     return '';
 }
 
 const basePath = getBasePath();
 
-// Load search index
+// Load search index with better error handling
 fetch(basePath + 'search-index.json')
     .then(response => {
         if (!response.ok) {
@@ -33,7 +42,9 @@ fetch(basePath + 'search-index.json')
     })
     .catch(err => {
         console.error('❌ Failed to load search index:', err);
-        console.log('Make sure search-index.json exists in the same directory');
+        console.log('Path attempted:', basePath + 'search-index.json');
+        console.log('Current location:', window.location.pathname);
+        console.log('Make sure search-index.json exists and is accessible');
     });
 
 // Search scoring function
