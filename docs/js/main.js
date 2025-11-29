@@ -9,38 +9,20 @@ let searchIndexLoaded = false;
 function getBasePath() {
     const path = window.location.pathname;
     
-    // If we're in sections/ or articles/ subdirectory, use relative path
+    // If we're in sections/ or articles/ subdirectory, go up one level
     if (path.includes('/sections/') || path.includes('/articles/') || path.includes('/categories/')) {
         return '../';
     }
     
-    // For root pages, check if we're on GitHub Pages
-    if (window.location.hostname.includes('github.io')) {
-        // GitHub Pages: use absolute path with repo name
-        // Extract repo name from path: /userology-helpdesk/index.html -> /userology-helpdesk/
-        const pathParts = path.split('/').filter(Boolean);
-        if (pathParts.length > 0 && pathParts[0] !== 'index.html') {
-            // First part is the repo name
-            return '/' + pathParts[0] + '/';
-        }
-    }
-    
-    // For local hosting, use relative path
+    // For root pages, use empty string (works for both local and GitHub Pages)
     return '';
 }
 
 const basePath = getBasePath();
-console.log('🔍 Base path for search:', basePath);
-console.log('🌐 Hostname:', window.location.hostname);
-console.log('📍 Pathname:', window.location.pathname);
 
-// Load search index with better error handling
-const searchIndexUrl = basePath + 'search-index.json';
-console.log('📂 Attempting to load from:', searchIndexUrl);
-
-fetch(searchIndexUrl)
+// Load search index
+fetch(basePath + 'search-index.json')
     .then(response => {
-        console.log('📡 Fetch response status:', response.status);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -49,12 +31,11 @@ fetch(searchIndexUrl)
     .then(data => {
         searchIndex = data;
         searchIndexLoaded = true;
-        console.log(`✅ Search index loaded successfully: ${searchIndex.length} articles`);
+        console.log(`✅ Search index loaded: ${searchIndex.length} articles`);
     })
     .catch(err => {
         console.error('❌ Failed to load search index:', err);
-        console.log('📍 Tried loading from:', searchIndexUrl);
-        console.log('📍 Full URL would be:', window.location.origin + searchIndexUrl);
+        console.log('Make sure search-index.json exists in the same directory');
     });
 
 // Search scoring function

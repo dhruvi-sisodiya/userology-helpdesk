@@ -62,6 +62,7 @@ zendesk_export_userology/
 *.json
 !package.json
 !package-lock.json
+!docs/search-index.json
 
 # Keep the offline help center website
 !offline_help_center/
