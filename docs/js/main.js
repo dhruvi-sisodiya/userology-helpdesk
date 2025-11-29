@@ -250,6 +250,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize search
     const searchInput = document.getElementById('searchInput');
+    const searchButton = document.getElementById('searchButton');
     if (searchInput) {
         console.log('✅ Search input found');
         createSearchDropdown();
@@ -257,6 +258,11 @@ document.addEventListener('DOMContentLoaded', function() {
         let searchTimeout;
         searchInput.addEventListener('input', function(e) {
             const query = e.target.value.trim();
+            
+            // Enable/disable button based on input
+            if (searchButton) {
+                searchButton.disabled = query.length === 0;
+            }
             console.log(`⌨️ Input event: "${query}"`);
             
             clearTimeout(searchTimeout);
