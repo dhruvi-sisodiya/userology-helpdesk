@@ -5,8 +5,21 @@ let searchResultsDropdown = null;
 let selectedResultIndex = -1;
 let searchIndexLoaded = false;
 
+// Determine the base path for loading resources
+function getBasePath() {
+    const path = window.location.pathname;
+    const depth = (path.match(/\//g) || []).length - 1;
+    
+    if (path.includes('/sections/') || path.includes('/articles/')) {
+        return '../';
+    }
+    return '';
+}
+
+const basePath = getBasePath();
+
 // Load search index
-fetch('search-index.json')
+fetch(basePath + 'search-index.json')
     .then(response => {
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -120,7 +133,12 @@ function createSearchDropdown() {
     searchResultsDropdown.className = 'search-results-dropdown';
     searchResultsDropdown.style.display = 'none';
     
-    const searchContainer = document.querySelector('.search-container');
+    // Try to find search container (works for both header and hero search)
+    let searchContainer = document.querySelector('.search-container');
+    if (!searchContainer) {
+        searchContainer = document.querySelector('.hero-search');
+    }
+    
     if (searchContainer) {
         searchContainer.style.position = 'relative';
         searchContainer.appendChild(searchResultsDropdown);
@@ -163,8 +181,11 @@ function showSearchResults(results, query) {
         const excerpt = (result.content || '').substring(0, 120) + '...';
         const highlightedExcerpt = highlightText(excerpt, query);
         
+        // Fix URL to be relative to current page location
+        const resultUrl = basePath + result.url;
+        
         html += `
-            <a href="${result.url}" class="search-result-item" data-index="${index}">
+            <a href="${resultUrl}" class="search-result-item" data-index="${index}">
                 <div class="search-result-title">${highlightedTitle}</div>
                 <div class="search-result-meta">${result.section || 'Unknown'}</div>
                 <div class="search-result-excerpt">${highlightedExcerpt}</div>
@@ -173,7 +194,7 @@ function showSearchResults(results, query) {
     });
     
     html += '</div>';
-    html += `<div class="search-results-footer"><a href="search.html?q=${encodeURIComponent(query)}">See all results →</a></div>`;
+    html += `<div class="search-results-footer"><a href="${basePath}search.html?q=${encodeURIComponent(query)}">See all results →</a></div>`;
     
     searchResultsDropdown.innerHTML = html;
     searchResultsDropdown.style.display = 'block';
@@ -185,7 +206,7 @@ function hideSearchResults() {
     if (searchResultsDropdown) {
         setTimeout(() => {
             searchResultsDropdown.style.display = 'none';
-        }, 200);
+        }, 300); // Increased delay to allow click events to fire
     }
 }
 
@@ -262,6 +283,13 @@ document.addEventListener('DOMContentLoaded', function() {
         searchInput.addEventListener('blur', hideSearchResults);
         searchInput.addEventListener('keydown', handleSearchKeyboard);
         
+        // Prevent dropdown from closing when clicking on results
+        document.addEventListener('mousedown', function(e) {
+            if (searchResultsDropdown && searchResultsDropdown.contains(e.target)) {
+                e.preventDefault(); // Prevent blur event
+            }
+        });
+        
         // Handle search form submission
         const searchForm = searchInput.closest('form');
         if (searchForm) {
@@ -269,7 +297,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.preventDefault();
                 const query = searchInput.value.trim();
                 if (query) {
-                    window.location.href = `search.html?q=${encodeURIComponent(query)}`;
+                    window.location.href = `${basePath}search.html?q=${encodeURIComponent(query)}`;
                 }
             });
         }
@@ -309,4 +337,104 @@ document.addEventListener('DOMContentLoaded', function() {
         img.style.opacity = '0';
         img.style.transition = 'opacity 0.3s ease';
     });
+    
+    // Video Carousel functionality
+    initVideoCarousel();
+    
+    // Header transparency on scroll
+    initHeaderScroll();
 });
+
+function initHeaderScroll() {
+    const header = document.querySelector('.header');
+    if (!header) return;
+    
+    let lastScroll = 0;
+    
+    window.addEventListener('scroll', () => {
+        const currentScroll = window.pageYOffset;
+        
+        if (currentScroll > 50) {
+            header.classList.add('scrolled');
+        } else {
+            header.classList.remove('scrolled');
+        }
+        
+        lastScroll = currentScroll;
+    });
+}
+
+function initVideoCarousel() {
+    const carousel = document.querySelector('.video-carousel');
+    if (!carousel) return;
+    
+    const track = carousel.querySelector('.video-carousel-track');
+    const cards = carousel.querySelectorAll('.video-carousel-card');
+    const leftArrow = document.querySelector('.carousel-arrow-left');
+    const rightArrow = document.querySelector('.carousel-arrow-right');
+    
+    if (!track || !leftArrow || !rightArrow || cards.length === 0) return;
+    
+    let currentIndex = 0;
+    let cardsPerView = 3;
+    
+    // Calculate cards per view based on screen width
+    function updateCardsPerView() {
+        const width = window.innerWidth;
+        if (width <= 640) {
+            cardsPerView = 1;
+        } else if (width <= 900) {
+            cardsPerView = 2;
+        } else {
+            cardsPerView = 3;
+        }
+        updateCarousel();
+    }
+    
+    // Update carousel position
+    function updateCarousel() {
+        const cardWidth = cards[0].offsetWidth;
+        const gap = 24; // var(--space-6) = 1.5rem = 24px
+        const offset = currentIndex * (cardWidth + gap);
+        track.style.transform = `translateX(-${offset}px)`;
+        
+        // Update arrow states
+        leftArrow.disabled = currentIndex === 0;
+        rightArrow.disabled = currentIndex >= cards.length - cardsPerView;
+    }
+    
+    // Navigation handlers
+    leftArrow.addEventListener('click', () => {
+        if (currentIndex > 0) {
+            currentIndex--;
+            updateCarousel();
+        }
+    });
+    
+    rightArrow.addEventListener('click', () => {
+        if (currentIndex < cards.length - cardsPerView) {
+            currentIndex++;
+            updateCarousel();
+        }
+    });
+    
+    // Handle window resize
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            currentIndex = 0; // Reset to start on resize
+            updateCardsPerView();
+        }, 250);
+    });
+    
+    // Make video cards clickable to go to videos page
+    cards.forEach((card, index) => {
+        card.addEventListener('click', () => {
+            window.location.href = 'videos.html';
+        });
+    });
+    
+    // Initial setup
+    updateCardsPerView();
+}

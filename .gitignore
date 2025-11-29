@@ -56,6 +56,7 @@ Thumbs.db
 config.ini
 secrets.json
 
+website_actual/
 # Zendesk export data (keep the offline website but exclude raw data)
 zendesk_export_userology/
 *.json
@@ -64,3 +65,4 @@ zendesk_export_userology/
 
 # Keep the offline help center website
 !offline_help_center/
+
