@@ -196,7 +196,7 @@ function showSearchResults(results, query) {
     });
     
     html += '</div>';
-    html += `<div class="search-results-footer"><a href="${basePath}search.html?q=${encodeURIComponent(query)}">See all results →</a></div>`;
+    html += `<div class="search-results-footer"><a href="${basePath}search.html?q=${encodeURIComponent(query)}">See all results</a></div>`;
     
     searchResultsDropdown.innerHTML = html;
     searchResultsDropdown.style.display = 'block';
