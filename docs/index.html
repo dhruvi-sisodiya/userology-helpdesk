@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="css/style.css?v=20251129">
     <link rel="icon" type="image/png" href="logo.png">
     <meta name="description" content="Get help with Userology">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 </head>
 <body class="home-page">
     <header class="header header-simple">
@@ -58,10 +59,159 @@
         </div>
     </section>
 
+    <!-- Vertical Tree Roadmap Section -->
+    <section class="roadmap-section">
+        <div class="container">
+            <h2 class="roadmap-title">Your Research Journey with Userology</h2>
+            
+            <div class="roadmap-tree">
+                <div class="tree-spine"></div>
+                <!-- Stage 1 -->
+                <div class="tree-row">
+                    <div class="tree-left">
+                        <div class="tree-node">1</div>
+                    </div>
+                    <div class="node-title">
+                        <h3>Study Setup</h3>
+                    </div>
+                    <div class="tree-connector"></div>
+                    <div class="tree-right">
+                        <a href="sections/section_25457022454173.html" class="roadmap-topic-card">
+                            <div class="topic-icon">📝</div>
+                            <div class="card-content">
+                                <h3>Study Setup</h3>
+                                <p class="topic-description">Learn how to create and configure your research studies</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="tree-line"></div>
+
+                <!-- Stage 2 -->
+                <div class="tree-row">
+                    <div class="tree-left">
+                        <div class="tree-node">2</div>
+                    </div>
+                    <div class="node-title">
+                        <h3>Interview Plan</h3>
+                    </div>
+                    <div class="tree-connector"></div>
+                    <div class="tree-right">
+                        <a href="sections/section_25457032309917.html" class="roadmap-topic-card">
+                            <div class="topic-icon">💬</div>
+                            <div class="card-content">
+                                <h3>Interview Plan</h3>
+                                <p class="topic-description">Set up discussion guides and interview sections</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="tree-line"></div>
+
+                <!-- Stage 3 -->
+                <div class="tree-row">
+                    <div class="tree-left">
+                        <div class="tree-node">3</div>
+                    </div>
+                    <div class="node-title">
+                        <h3>Configure Settings</h3>
+                    </div>
+                    <div class="tree-connector"></div>
+                    <div class="tree-right">
+                        <a href="sections/section_25456987366429.html" class="roadmap-topic-card">
+                            <div class="topic-icon">⚙️</div>
+                            <div class="card-content">
+                                <h3>Study Settings</h3>
+                                <p class="topic-description">Configure AI moderator, devices, permissions, and more</p>
+                            </div>
+                        </a>
+                        <a href="sections/section_25562911720605.html" class="roadmap-topic-card">
+                            <div class="topic-icon">👥</div>
+                            <div class="card-content">
+                                <h3>Settings and Admin</h3>
+                                <p class="topic-description">Manage your team and organization settings</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="tree-line"></div>
+
+                <!-- Stage 4 -->
+                <div class="tree-row">
+                    <div class="tree-left">
+                        <div class="tree-node">4</div>
+                    </div>
+                    <div class="node-title">
+                        <h3>Launch Study</h3>
+                    </div>
+                    <div class="tree-connector"></div>
+                    <div class="tree-right">
+                        <a href="sections/section_25457005624349.html" class="roadmap-topic-card">
+                            <div class="topic-icon">🚀</div>
+                            <div class="card-content">
+                                <h3>Launch</h3>
+                                <p class="topic-description">Recruit participants and preview your study</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="tree-line"></div>
+
+                <!-- Stage 5 -->
+                <div class="tree-row">
+                    <div class="tree-left">
+                        <div class="tree-node">5</div>
+                    </div>
+                    <div class="node-title">
+                        <h3>Collect Data</h3>
+                    </div>
+                    <div class="tree-connector"></div>
+                    <div class="tree-right">
+                        <a href="sections/section_25457015415453.html" class="roadmap-topic-card">
+                            <div class="topic-icon">🎥</div>
+                            <div class="card-content">
+                                <h3>Responses and Recordings</h3>
+                                <p class="topic-description">Manage recordings, clips, and participant responses</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="tree-line"></div>
+
+                <!-- Stage 6 -->
+                <div class="tree-row">
+                    <div class="tree-left">
+                        <div class="tree-node">6</div>
+                    </div>
+                    <div class="node-title">
+                        <h3>Analyze Results</h3>
+                    </div>
+                    <div class="tree-connector"></div>
+                    <div class="tree-right">
+                        <a href="sections/section_25457032160541.html" class="roadmap-topic-card">
+                            <div class="topic-icon">📊</div>
+                            <div class="card-content">
+                                <h3>Results and Reports</h3>
+                                <p class="topic-description">Analyze qualitative and quantitative research data</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="tree-line"></div>
+            </div>
+        </div>
+    </section>
+
     <main class="main main-home">
         <div class="container">
             <div class="content">
-                <div class="topic-section">
+                <div class="topic-section" style="display: none;">
                     <h2>Topics</h2>
                     <div class="topic-grid topic-grid-home">
 
@@ -284,5 +434,28 @@
     </footer>
 
     <script src="js/main.js"></script>
+    <script>
+        // Initialize Mermaid with dark theme and responsive fonts
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'dark',
+            flowchart: {
+                curve: 'basis',
+                nodeSpacing: 40,
+                rankSpacing: 60,
+                padding: 15
+            },
+            themeVariables: {
+                primaryColor: '#3e246b',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#8c40ff',
+                lineColor: '#8c40ff',
+                secondaryColor: '#8c40ff',
+                tertiaryColor: '#1a1a2e',
+                fontSize: '16px',
+                fontFamily: 'Inter, system-ui, -apple-system, sans-serif'
+            }
+        });
+    </script>
 </body>
 </html>
