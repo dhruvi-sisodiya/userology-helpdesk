@@ -594,12 +594,11 @@ body.scrolled .header .nav-in-header {
 }
 
 .node-title {
-    background: transparent;
+    background: rgba(20, 20, 30, 0.6);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
     padding: var(--space-4) var(--space-5);
     box-shadow: 0 0 15px rgba(139, 123, 247, 0.3), 0 0 30px rgba(139, 123, 247, 0.15);
-    background: linear-gradient(135deg, rgba(62, 36, 107, 0.2) 0%, rgba(140, 64, 255, 0.15) 100%);
     transition: all 0.3s ease;
 }
 
@@ -608,6 +607,7 @@ body.scrolled .header .nav-in-header {
     font-size: 1.125rem;
     font-weight: 600;
     color: #ffffff !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .node-title:hover {
