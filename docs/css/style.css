@@ -443,6 +443,34 @@ body.scrolled .header .nav-in-header {
     display: none;
 }
 
+/* ========== VIDEO INTRO SECTION ========== */
+.video-intro-section {
+    background: transparent;
+    padding: var(--space-8) 0;
+    margin: 0;
+}
+
+.video-wrapper {
+    position: relative;
+    padding-bottom: 21.09375%; /* Half of 16:9 aspect ratio at 600px width */
+    height: 0;
+    overflow: hidden;
+    max-width: 600px;
+    margin: 0 auto;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 0 30px rgba(139, 123, 247, 0.4), 0 0 60px rgba(139, 123, 247, 0.2);
+    border: 1px solid rgba(139, 123, 247, 0.3);
+}
+
+.video-wrapper iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: var(--radius-lg);
+}
+
 /* ========== MAIN LAYOUT ========== */
 .main {
     display: grid;
@@ -526,6 +554,13 @@ body.scrolled .header .nav-in-header {
     position: relative;
     z-index: 1;
     margin-bottom: var(--space-6);
+    padding-bottom: var(--space-6);
+    border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.tree-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
 }
 
 .tree-left {
@@ -537,7 +572,7 @@ body.scrolled .header .nav-in-header {
 .tree-node {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #fff;
+    color: #ffffff !important;
     background: linear-gradient(135deg, rgba(62, 36, 107, 0.8) 0%, rgba(140, 64, 255, 0.6) 100%);
     border: 2px solid var(--color-accent);
     width: 50px;
@@ -572,7 +607,7 @@ body.scrolled .header .nav-in-header {
     margin: 0;
     font-size: 1.125rem;
     font-weight: 600;
-    color: #fff;
+    color: #ffffff !important;
 }
 
 .node-title:hover {
@@ -644,10 +679,7 @@ body.scrolled .header .nav-in-header {
 .roadmap-topic-card h3 {
     margin: 0 0 var(--space-2) 0;
     font-size: 1.125rem;
-    background: linear-gradient(135deg, var(--color-primary) 33%, var(--color-accent) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #ffffff !important;
     font-weight: 600;
 }
 
@@ -684,6 +716,95 @@ body.scrolled .header .nav-in-header {
     font-size: 1rem;
 }
 
+/* ========== VIDEO TREE STRUCTURE ========== */
+.video-tree-section {
+    margin-top: var(--space-8);
+}
+
+.video-topic-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-4);
+}
+
+.video-card-compact {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(139, 123, 247, 0.3), 0 0 30px rgba(139, 123, 247, 0.15);
+    background: linear-gradient(135deg, rgba(62, 36, 107, 0.15) 0%, rgba(140, 64, 255, 0.1) 100%);
+}
+
+.video-card-compact:hover {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 15px rgba(139, 123, 247, 0.5), 0 0 30px rgba(139, 123, 247, 0.25);
+    transform: translateY(-3px);
+}
+
+.video-thumbnail-compact {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: #000;
+}
+
+.video-thumbnail-compact video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.video-info-compact {
+    padding: var(--space-3) var(--space-4);
+}
+
+.video-info-compact h4 {
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #ffffff !important;
+    line-height: 1.4;
+}
+
+/* ========== ARTICLE TREE STRUCTURE ========== */
+.article-tree-section {
+    margin-top: var(--space-8);
+}
+
+.article-topic-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--space-3);
+}
+
+.article-card-tree {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(139, 123, 247, 0.3), 0 0 30px rgba(139, 123, 247, 0.15);
+    background: linear-gradient(135deg, rgba(62, 36, 107, 0.15) 0%, rgba(140, 64, 255, 0.1) 100%);
+    display: block;
+}
+
+.article-card-tree:hover {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 15px rgba(139, 123, 247, 0.5), 0 0 30px rgba(139, 123, 247, 0.25);
+    transform: translateY(-2px);
+}
+
+.article-card-tree h4 {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #ffffff !important;
+    line-height: 1.5;
+}
+
 /* Responsive */
 @media (max-width: 1200px) {
     .tree-row {
@@ -712,6 +833,16 @@ body.scrolled .header .nav-in-header {
 }
 
 @media (max-width: 768px) {
+    .video-wrapper {
+        max-width: 100%;
+        padding-bottom: 56.25%; /* Standard 16:9 on mobile */
+        border-radius: var(--radius-md);
+    }
+    
+    .video-intro-section {
+        padding: var(--space-6) var(--space-4);
+    }
+
     .roadmap-title {
         font-size: 1.75rem;
     }
@@ -759,6 +890,14 @@ body.scrolled .header .nav-in-header {
         flex-direction: row;
         text-align: left;
         gap: var(--space-4);
+    }
+    
+    .video-topic-group {
+        grid-template-columns: 1fr;
+    }
+    
+    .article-topic-group {
+        grid-template-columns: 1fr;
     }
 }
 
@@ -1516,15 +1655,12 @@ body.scrolled .header .nav-in-header {
     font-family: var(--font-headings);
     margin: 0 0 var(--space-6) 0;
     line-height: 1.2;
-    background: linear-gradient(0deg, rgb(96, 91, 255) 0%, rgb(159, 156, 255) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #ffffff;
 }
 
 .content > p {
     font-size: 1.0625rem;
-    color: var(--color-text-light);
+    color: #ffffff;
     margin: 0 0 var(--space-8) 0;
 }
 
@@ -1533,10 +1669,7 @@ body.scrolled .header .nav-in-header {
     font-weight: 700;
     font-family: var(--font-headings);
     margin: var(--space-12) 0 var(--space-6) 0;
-    background: linear-gradient(0deg, rgb(96, 91, 255) 0%, rgb(159, 156, 255) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #ffffff;
 }
 
 /* First h2 (like "Popular Articles") */
