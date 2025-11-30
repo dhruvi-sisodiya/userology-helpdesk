@@ -450,6 +450,24 @@ body.scrolled .header .nav-in-header {
     margin: 0;
 }
 
+.video-intro-title {
+    text-align: center;
+    font-size: 2rem;
+    margin: 0 0 var(--space-3) 0;
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.video-intro-description {
+    text-align: center;
+    font-size: 1.0625rem;
+    margin: 0 0 var(--space-6) 0;
+    color: rgba(255, 255, 255, 0.8);
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 .video-wrapper {
     position: relative;
     padding-bottom: 21.09375%; /* Half of 16:9 aspect ratio at 600px width */
@@ -573,7 +591,7 @@ body.scrolled .header .nav-in-header {
     font-size: 1.5rem;
     font-weight: 700;
     color: #ffffff !important;
-    background: linear-gradient(135deg, rgba(62, 36, 107, 0.8) 0%, rgba(140, 64, 255, 0.6) 100%);
+    background: rgba(30, 30, 45, 0.9);
     border: 2px solid var(--color-accent);
     width: 50px;
     height: 50px;
@@ -2653,33 +2671,47 @@ body.scrolled .header .nav-in-header {
 
 @media (max-width: 640px) {
     .video-carousel-card {
-        flex: 0 0 100%;
-        max-width: 100%;
+        flex: 0 0 85%;
+        min-width: 85%;
+        max-width: 85%;
     }
     
     .video-carousel-container {
         padding: 0;
+        margin: 0;
+    }
+    
+    .video-carousel {
         overflow-x: auto;
         scroll-snap-type: x mandatory;
         -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-        width: 100%;
-        max-width: 100%;
+        scrollbar-width: thin;
+        margin: 0;
+        padding: 0 var(--space-4);
     }
     
-    .video-carousel-container::-webkit-scrollbar {
-        display: none;
+    .video-carousel::-webkit-scrollbar {
+        height: 4px;
+    }
+    
+    .video-carousel::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 2px;
+    }
+    
+    .video-carousel::-webkit-scrollbar-thumb {
+        background: rgba(139, 123, 247, 0.5);
+        border-radius: 2px;
     }
     
     .video-carousel-track {
         gap: var(--space-4);
-        padding: 0 var(--space-4);
+        padding: 0;
     }
     
     .video-carousel-card {
-        scroll-snap-align: start;
-        width: calc(100% - var(--space-8));
-        max-width: calc(100% - var(--space-8));
+        scroll-snap-align: center;
+        scroll-snap-stop: always;
     }
     
     .carousel-arrow {

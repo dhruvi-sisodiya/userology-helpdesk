@@ -120,7 +120,7 @@ python build_search_index.py
 **Cache Busting:**
 
 - CSS: `?v=20251129`
-
+  
 ## Search Feature Fix
 
 **Cross-page navigation fix:**
@@ -138,3 +138,32 @@ python build_search_index.py
 - Added mousedown event prevention to keep dropdown visible during clicks
 - Dropdown now properly attaches to search container on all page types
 - Enhanced positioning with `position: relative` on hero search container
+
+
+## Tree-Line Structure for Better Accessibility
+
+**Vertical roadmap design:**
+- Research journey visualized as 6-stage vertical timeline on homepage, videos page, and articles page
+- Left-aligned purple spine line (3px, #6366F1) with pulsing glow animation
+- Numbered nodes (1-6) in dark circles connected to stage titles and content cards
+- 4-column CSS Grid layout: node | title | connector | content
+- Responsive breakpoints collapse to single column on mobile (<768px)
+
+**Implementation across pages:**
+- **Homepage:** 6 stages linking to topic sections with glass-morphism cards
+- **Videos page:** 6 topic groups organizing 27 videos by research workflow stage
+- **Articles page:** 7 topic groups organizing 24 articles by stage (adds Settings & Admin)
+- Separator lines between stages for clear visual hierarchy
+- Scroll snap and horizontal swipe on mobile for touch navigation
+- fadeIn animation (0.8s) on page load, spinePulse (3s infinite) on spine
+
+## YouTube Video Introduction
+
+**Embedded overview video:**
+- YouTube video (YfgczxQHuX0) embedded on homepage after roadmap section
+- Positioned between research journey tree and popular articles
+- Responsive iframe wrapper: 600px max-width, 21.09375% padding-bottom (half 16:9 ratio)
+- Intro text: "Watch Userology in Action" with descriptive paragraph
+- Centered white text styling with proper spacing for visual hierarchy
+- Provides quick overview of Userology features and use cases for new users
+
