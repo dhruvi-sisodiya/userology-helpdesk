@@ -483,6 +483,18 @@ body.scrolled .header .nav-in-header {
     margin: 0 auto;
     position: relative;
     padding-left: var(--space-8);
+    animation: fadeIn 0.8s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .tree-spine {
@@ -494,6 +506,16 @@ body.scrolled .header .nav-in-header {
     background: var(--color-accent);
     box-shadow: 0 0 8px rgba(140, 64, 255, 0.5);
     z-index: 0;
+    animation: spinePulse 3s ease-in-out infinite;
+}
+
+@keyframes spinePulse {
+    0%, 100% {
+        box-shadow: 0 0 8px rgba(140, 64, 255, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 15px rgba(140, 64, 255, 0.8), 0 0 25px rgba(140, 64, 255, 0.4);
+    }
 }
 
 .tree-row {
