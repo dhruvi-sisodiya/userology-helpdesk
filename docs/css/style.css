@@ -492,8 +492,8 @@ body.scrolled .header .nav-in-header {
 /* ========== MAIN LAYOUT ========== */
 .main {
     display: grid;
-    grid-template-columns: 220px 1fr;
-    gap: var(--space-8);
+    grid-template-columns: 180px 1fr;
+    gap: var(--space-6);
     margin: var(--space-4) 0;
     align-items: start;
     width: 100%;
@@ -1614,16 +1614,17 @@ body.scrolled .header .nav-in-header {
     background: var(--color-bg-card);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
-    padding: var(--space-6);
+    padding: var(--space-4);
     position: sticky;
     top: 140px;
+    font-size: 0.875rem;
 }
 
 .sidebar h3 {
-    font-size: 1rem;
+    font-size: 0.875rem;
     font-weight: 700;
     font-family: var(--font-headings);
-    margin: 0 0 var(--space-4) 0;
+    margin: 0 0 var(--space-3) 0;
     /* background: linear-gradient(0deg, rgb(96, 91, 255) 0%, rgb(159, 156, 255) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent; */
@@ -1636,9 +1637,9 @@ body.scrolled .header .nav-in-header {
 
 .sidebar a {
     display: block;
-    padding: var(--space-3) var(--space-4);
+    padding: var(--space-2) var(--space-3);
     color: var(--color-text-light);
-    font-size: 0.9375rem;
+    font-size: 0.8125rem;
     border-radius: var(--radius-md);
     transition: all 0.2s;
 }
@@ -3114,6 +3115,7 @@ body.scrolled .header .nav-in-header {
 
 /* ========== BREADCRUMB NAVIGATION ========== */
 .breadcrumb {
+    grid-column: 1 / -1;
     margin-bottom: var(--space-6);
     padding: var(--space-3) 0;
 }
