@@ -188,15 +188,23 @@ function showSearchResults(results, query) {
         
         html += `
             <a href="${resultUrl}" class="search-result-item" data-index="${index}">
-                <div class="search-result-title">${highlightedTitle}</div>
-                <div class="search-result-meta">${result.section || 'Unknown'}</div>
+                <div class="search-result-header">
+                    <div class="search-result-title">${highlightedTitle}</div>
+                    <div class="search-result-category">${result.section || 'Article'}</div>
+                </div>
                 <div class="search-result-excerpt">${highlightedExcerpt}</div>
             </a>
         `;
     });
     
     html += '</div>';
-    html += `<div class="search-results-footer"><a href="${basePath}search.html?q=${encodeURIComponent(query)}">See all results</a></div>`;
+    html += `
+        <div class="search-results-footer">
+            <a href="${basePath}search.html?q=${encodeURIComponent(query)}">
+                View all ${results.length} result${results.length !== 1 ? 's' : ''} →
+            </a>
+        </div>
+    `;
     
     searchResultsDropdown.innerHTML = html;
     searchResultsDropdown.style.display = 'block';
@@ -456,3 +464,132 @@ function initVideoCarousel() {
     // Initial setup
     updateCardsPerView();
 }
+
+// ========== ARTICLE FEEDBACK SYSTEM ==========
+document.addEventListener('DOMContentLoaded', function() {
+    const feedbackSection = document.querySelector('.article-feedback');
+    if (!feedbackSection) return; // Only run on article pages
+    
+    const yesBtn = feedbackSection.querySelector('.feedback-yes');
+    const noBtn = feedbackSection.querySelector('.feedback-no');
+    const feedbackResponse = feedbackSection.querySelector('.feedback-response');
+    const feedbackMessage = feedbackSection.querySelector('.feedback-message');
+    const feedbackDetails = feedbackSection.querySelector('.feedback-details');
+    const submitBtn = feedbackSection.querySelector('.feedback-submit-btn');
+    const skipBtn = feedbackSection.querySelector('.feedback-skip-btn');
+    const textarea = feedbackSection.querySelector('.feedback-textarea');
+    const buttons = feedbackSection.querySelector('.feedback-buttons');
+    
+    // Get article ID from URL
+    const articleId = window.location.pathname.split('/').pop().replace('.html', '');
+    
+    // Check if user already voted on this article
+    const existingVote = localStorage.getItem(`feedback_${articleId}`);
+    if (existingVote) {
+        showThankYou(existingVote);
+        return;
+    }
+    
+    // Handle Yes vote
+    yesBtn.addEventListener('click', function() {
+        recordFeedback('helpful');
+        buttons.style.display = 'none';
+        feedbackResponse.style.display = 'block';
+        feedbackMessage.textContent = '✓ Thank you for your feedback! We\'re glad this article helped you.';
+        yesBtn.classList.add('active');
+        
+        // Store vote
+        localStorage.setItem(`feedback_${articleId}`, 'helpful');
+        
+        // Send to analytics (if integrated)
+        trackFeedback(articleId, 'helpful', null);
+    });
+    
+    // Handle No vote
+    noBtn.addEventListener('click', function() {
+        buttons.style.display = 'none';
+        feedbackResponse.style.display = 'block';
+        feedbackMessage.textContent = 'We\'re sorry this article wasn\'t helpful.';
+        feedbackDetails.style.display = 'block';
+        noBtn.classList.add('active');
+        
+        // Focus textarea
+        textarea.focus();
+    });
+    
+    // Handle feedback submission
+    submitBtn.addEventListener('click', function() {
+        const feedbackText = textarea.value.trim();
+        recordFeedback('not-helpful', feedbackText);
+        
+        feedbackDetails.style.display = 'none';
+        feedbackMessage.textContent = '✓ Thank you for your feedback! We\'ll use it to improve this article.';
+        
+        // Store vote
+        localStorage.setItem(`feedback_${articleId}`, 'not-helpful');
+        
+        // Send to analytics
+        trackFeedback(articleId, 'not-helpful', feedbackText);
+    });
+    
+    // Handle skip
+    skipBtn.addEventListener('click', function() {
+        recordFeedback('not-helpful', null);
+        
+        feedbackDetails.style.display = 'none';
+        feedbackMessage.textContent = '✓ Thank you for your feedback!';
+        
+        // Store vote
+        localStorage.setItem(`feedback_${articleId}`, 'not-helpful');
+        
+        // Send to analytics
+        trackFeedback(articleId, 'not-helpful', null);
+    });
+    
+    function showThankYou(vote) {
+        buttons.style.display = 'none';
+        feedbackResponse.style.display = 'block';
+        feedbackMessage.textContent = vote === 'helpful' 
+            ? '✓ You already voted this article as helpful. Thank you!'
+            : '✓ Thank you for your previous feedback!';
+        
+        if (vote === 'helpful') {
+            yesBtn.classList.add('active');
+        } else {
+            noBtn.classList.add('active');
+        }
+    }
+    
+    function recordFeedback(vote, comment) {
+        // Store in localStorage for persistence
+        const feedback = {
+            articleId: articleId,
+            vote: vote,
+            comment: comment,
+            timestamp: new Date().toISOString()
+        };
+        
+        // Get existing feedback array
+        const allFeedback = JSON.parse(localStorage.getItem('article_feedback') || '[]');
+        allFeedback.push(feedback);
+        localStorage.setItem('article_feedback', JSON.stringify(allFeedback));
+        
+        console.log('Feedback recorded:', feedback);
+    }
+    
+    function trackFeedback(articleId, vote, comment) {
+        // Placeholder for analytics integration
+        // In production, send to your analytics service:
+        // gtag('event', 'article_feedback', { article_id: articleId, vote: vote });
+        // or
+        // analytics.track('Article Feedback', { article_id: articleId, vote: vote, comment: comment });
+        
+        console.log('Analytics event:', {
+            event: 'article_feedback',
+            article_id: articleId,
+            vote: vote,
+            comment: comment
+        });
+    }
+});
+
