@@ -156,12 +156,12 @@ Search worked well on the homepage but encountered issues on article pages.
 
 I studied Intercom, Zendesk, and Linear. The pattern was consistent: **instant, inline results**. No "submit and wait" experience. No separate results page.
 
-![Search Inspiration](website_actual/Screenshot 2025-11-29 173902.png)
+![Search Inspiration](website_actual/Screenshot_2025-11-29_173902.png)
 *Reference: Search patterns from successful help centers*
 
 Users have been trained by Google to expect instant feedback. Fighting this expectation would just frustrate them.
 
-![Required Search Features](website_actual/Screenshot 2025-11-28 140614.png)
+![Required Search Features](website_actual/Screenshot_2025-11-28_140614.png)
 *The search features I aimed to implement*
 
 ---
