@@ -376,6 +376,58 @@ This comprehensive testing helps ensure a good experience across devices.
 
 ---
 
+## Creating a Universal Footer for Better Navigation
+
+### The Challenge of Keeping Users Connected
+
+Once users found their answers in the help center, I wanted to make it effortless for them to:
+- Navigate back to the main Userology website
+- Reach out for direct support via email
+- Quickly access other help center sections
+
+A well-designed footer serves as a safety net—always available, never intrusive.
+
+### Design Philosophy: Centered and Uncluttered
+
+Instead of the traditional multi-column grid layout, I designed a centered footer that feels unique and intentional:
+
+**Centered brand identity:**
+- Logo with subtle purple glow effect
+- "Userology Help Center" title with gradient styling
+- Tagline that reinforces the product value
+
+**Horizontal navigation links:**
+- Main sections (Home, Browse Topics, Articles, Videos)
+- Popular topics (Study Setup, Responses, Results)
+- Separated by elegant vertical dividers
+
+**Prominent contact actions:**
+- Email button with envelope icon linking to support@userology.co.in
+- Website button with globe icon linking to https://www.userology.co/
+- Both styled as interactive pills with hover effects
+
+### Visual Design Choices
+
+**Gradient background:** Subtle gradient from dark purple-tinted to deeper black creates depth
+
+**Interactive elements:** Links have animated underlines that expand on hover, buttons lift slightly with glowing borders
+
+**Iconography:** SVG icons for email and website make the purpose immediately clear
+
+**Responsive behavior:** On mobile, the horizontal links stack vertically and dividers rotate to horizontal
+
+### Why This Improves User Experience
+
+**Easy access to parent website:** Users can instantly return to Userology.co if they want to explore features or upgrade their plan
+
+**Direct support channel:** The email link (support@userology.co.in) removes friction when users need personalized help
+
+**Visual consistency:** The footer maintains the glass-morphism and purple gradient theme used throughout the help center
+
+**Navigation redundancy:** Even if users scroll past all content, they can still access key sections without scrolling back up
+
+---
+
 ## Features to Support Continued Learning
 
 After building the foundation (search, roadmap, branding, mobile), I added features to help users discover related content and continue their learning journey.
