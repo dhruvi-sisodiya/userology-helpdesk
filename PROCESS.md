@@ -379,15 +379,15 @@ Estimated impact: pages per session should increase from ~1.2 to ~2.8.
 - JavaScript: js/main.js (~250 lines added)
 
 **Features Shipped:**
-1. ✅ Working search with keyboard navigation
-2. ✅ Tree-line workflow roadmap  
-3. ✅ Brand-consistent dark theme
-4. ✅ Article feedback system
-5. ✅ Related articles (72 mappings)
-6. ✅ Breadcrumb navigation
-7. ✅ Enhanced search with category tags
-8. ✅ Full mobile responsiveness
-9. ✅ Python automation for bulk updates
+- Working search with keyboard navigation
+- Tree-line workflow roadmap  
+- Brand-consistent dark theme
+- Article feedback system
+- Related articles (72 mappings)
+- Breadcrumb navigation
+- Enhanced search with category tags
+- Full mobile responsiveness
+- Python automation for bulk updates
 
 **Live Site:** https://dhruvi-sisodiya.github.io/userology-helpdesk/
 
