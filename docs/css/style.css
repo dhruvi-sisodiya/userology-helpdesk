@@ -624,8 +624,6 @@ body.scrolled .header .nav-in-header {
     margin: 0;
     font-size: 1.125rem;
     font-weight: 600;
-    color: #ffffff !important;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .node-title:hover {
