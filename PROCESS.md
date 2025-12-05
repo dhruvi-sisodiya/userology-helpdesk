@@ -299,8 +299,6 @@ Pushed updated styles to GitHub Pages. Refreshed browser. Nothing changed.
 ![Footer Issue Example](website_actual/footer_issue.png)
 *Debugging layout issues during development*
 
-![Footer Design Reference](website_actual/footer_example.png)
-*Final footer design inspiration*
 
 ---
 
