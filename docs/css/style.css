@@ -1959,14 +1959,103 @@ body.scrolled .header .nav-in-header {
 .footer {
     background: var(--color-bg);
     color: var(--color-text-light);
-    text-align: center;
-    padding: var(--space-12) 0;
+    padding: var(--space-12) 0 var(--space-8);
     margin-top: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.footer p {
+.footer-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: var(--space-8);
+    margin-bottom: var(--space-8);
+}
+
+.footer-section h4 {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    margin-bottom: var(--space-4);
+    color: var(--color-text-lighter);
+}
+
+.footer-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-section ul li {
+    margin-bottom: var(--space-2);
+}
+
+.footer-section ul li a {
+    color: var(--color-text-light);
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: color 0.2s;
+}
+
+.footer-section ul li a:hover {
+    color: var(--color-primary);
+}
+
+.footer-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-3);
+}
+
+.footer-logo {
+    height: 32px;
+    width: auto;
+}
+
+.footer-brand h3 {
+    font-size: 1.25rem;
+    margin: 0;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.footer-description {
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--color-text-lighter);
+    margin: 0;
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: var(--space-6);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.footer-bottom p {
     font-size: 0.875rem;
     margin: 0;
+    color: var(--color-text-lighter);
+}
+
+@media (max-width: 1024px) {
+    .footer-content {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-6);
+    }
+}
+
+@media (max-width: 640px) {
+    .footer-content {
+        grid-template-columns: 1fr;
+        gap: var(--space-6);
+    }
+    
+    .footer-section {
+        text-align: left;
+    }
 }
 
 /* ========== RESPONSIVE ========== */
