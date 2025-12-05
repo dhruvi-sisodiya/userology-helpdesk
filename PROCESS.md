@@ -156,12 +156,9 @@ Search worked well on the homepage but encountered issues on article pages.
 
 I studied Intercom, Zendesk, and Linear. The pattern was consistent: **instant, inline results**. No "submit and wait" experience. No separate results page.
 
-![Search Inspiration](website_actual/Screenshot_2025-11-29_173902.png)
-*Reference: Search patterns from successful help centers*
-
 Users have been trained by Google to expect instant feedback. Fighting this expectation would just frustrate them.
 
-![Required Search Features](website_actual/Screenshot_2025-11-28_140614.png)
+![Required Search Features](website_actual/required_search.png)
 *The search features I aimed to implement*
 
 ---
@@ -229,14 +226,14 @@ Meanwhile, Userology's main website featured sophisticated dark purple gradients
 
 **The opportunity:** Aligning the help center's visual design with the product would create a more cohesive experience.
 
-### Becoming a Design Detective
+### Matching the Product's Visual Style
 
-I opened Userology's website and became a color detective:
+I analyzed Userology's website to extract design patterns:
 
-- Screenshot key sections to capture the exact aesthetic
-- Use browser tools to inspect design elements
-- Extract color values, gradient patterns, shadow effects
-- Document spacing and typography choices
+- Captured key sections to understand the aesthetic
+- Used browser tools to inspect elements
+- Extracted color values and gradient patterns
+- Documented spacing and typography
 
 ![Userology Website Fonts and Background](website_actual/website_fonts_and_background.png)
 *Color palette and typography from Userology's main website*
@@ -251,46 +248,37 @@ I opened Userology's website and became a color detective:
 ![Website Card Design](website_actual/website_cards.png)
 *Card styling reference from the main product*
 
-### Building the Visual System
+### Applying the Visual Patterns
 
-**Glass-morphism effects:**
+**Card styling:**
 
-I created modern "frosted glass" cards with semi-transparent backgrounds, blur effects, and subtle purple borders. With Copilot's help, I refined the opacity and blur values to achieve that perfect depth and sophistication.
+Implemented glass-morphism effects with semi-transparent backgrounds, blur effects, and purple borders to match the main product.
 
 ![Background Gradient Reference](website_actual/bg_gradient.png)
 *Purple gradient patterns from Userology's design system*
 
-**Hover interactions:**
+**Interactive elements:**
 
-When users hover over cards, they lift slightly with a gentle purple glow. Subtle movement + glow = engaging without being distracting.
+Added hover effects where cards lift slightly with a purple glow for better user feedback.
 
-**Typography matching:**
+**Typography:**
 
-- Figtree for body text (warm, readable)
-- Inter for headings (clean, modern)
+- Figtree for body text
+- Inter for headings
 
-### The Text Readability Crisis
+### Fixing Text Readability
 
-Dark themes look beautiful but create contrast problems. White text on gradient backgrounds became nearly invisible in places.
+White text on gradient backgrounds had visibility issues in some areas.
 
 ![Node Color Issue](website_actual/node_color.png)
 *Before: Text visibility issues on gradient backgrounds*
 
-**My debugging process:**
-
-1. **Attempt:** Force white text color
-   - **Result:** Gradient still bleeds through, text fuzzy
-2. **Attempt:** Add shadow effects for separation
-   - **Result:** Better but still blurry, looks amateurish
-3. **Attempt:** Remove gradient styling from text elements entirely
-   - **Result:** Perfect clarity!
+**The fix:** Removed gradient styling from text elements to prevent conflicts.
 
 ![Bottom Gradient Fix](website_actual/bottom_gradient_fix.png)
-*After: Improved text clarity by removing conflicting gradient properties*
+*After: Improved text clarity*
 
-I applied this fix to roadmap titles, video cards, article headings, and related article sections.
-
-**Lesson learned:** Sometimes the solution isn't adding more styling—it's removing conflicting properties.
+Applied this to roadmap titles, video cards, article headings, and related article sections.
 
 ### The Deployment Cache Battle
 
