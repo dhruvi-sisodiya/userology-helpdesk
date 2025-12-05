@@ -238,7 +238,7 @@ I opened Userology's website and became a color detective:
 - Extract color values, gradient patterns, shadow effects
 - Document spacing and typography choices
 
-![Userology Website Fonts and Background](website_actual/website%20fonts%20and%20background.png)
+![Userology Website Fonts and Background](website_actual/website_fonts_and_background.png)
 *Color palette and typography from Userology's main website*
 
 **Colors I captured:**
@@ -248,7 +248,7 @@ I opened Userology's website and became a color detective:
 - Subtle purple-tinted card backgrounds
 - Barely visible separation lines
 
-![Website Card Design](website_actual/website%20cards.png)
+![Website Card Design](website_actual/website_cards.png)
 *Card styling reference from the main product*
 
 ### Building the Visual System
@@ -273,7 +273,7 @@ When users hover over cards, they lift slightly with a gentle purple glow. Subtl
 
 Dark themes look beautiful but create contrast problems. White text on gradient backgrounds became nearly invisible in places.
 
-![Node Color Issue](website_actual/node%20color.png)
+![Node Color Issue](website_actual/node_color.png)
 *Before: Text visibility issues on gradient backgrounds*
 
 **My debugging process:**
@@ -300,10 +300,10 @@ Pushed updated styles to GitHub Pages. Refreshed browser. Nothing changed.
 
 **My solution:** Added version numbers to file references. Now every update increments the version, forcing browsers to download fresh files instead of using cached versions.
 
-![Footer Issue Example](website_actual/footer%20issue.png)
+![Footer Issue Example](website_actual/footer_issue.png)
 *Debugging layout issues during development*
 
-![Footer Design Reference](website_actual/footer%20example.png)
+![Footer Design Reference](website_actual/footer_example.png)
 *Final footer design inspiration*
 
 ---
@@ -321,7 +321,7 @@ Then I tested on my actual phone and discovered several issues:
 - Some text sizes needed adjustment
 - Navigation layout needed refinement
 
-![Article Misalignment Issue](website_actual/article%20misalignment.png)
+![Article Misalignment Issue](website_actual/article_misalignment.png)
 *Debugging layout alignment issues discovered during testing*
 
 ![Spacing Issues](website_actual/sapcing.png)

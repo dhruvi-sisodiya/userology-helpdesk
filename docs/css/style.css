@@ -1982,10 +1982,7 @@ body.scrolled .header .nav-in-header {
 .footer-brand-center h3 {
     font-size: 1.5rem;
     margin: var(--space-2) 0;
-    background: linear-gradient(135deg, #a78bfa 0%, #ec4899 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #ffffff;
     font-weight: 600;
 }
 
@@ -2007,9 +2004,16 @@ body.scrolled .header .nav-in-header {
 
 .footer-link-group {
     display: flex;
-    gap: var(--space-5);
+    gap: var(--space-3);
     flex-wrap: wrap;
     justify-content: center;
+    align-items: center;
+}
+
+.footer-separator {
+    color: rgba(140, 64, 255, 0.4);
+    font-size: 0.875rem;
+    user-select: none;
 }
 
 .footer-link-group a {
