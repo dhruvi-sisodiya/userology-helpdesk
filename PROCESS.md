@@ -115,6 +115,8 @@ This became my development sequence.
 
 ---
 
+# SOLUTION 1: Building Functional Search
+
 ## Fixing Search: Making It Actually Work
 
 ### The Problem-Solving Journey
@@ -162,6 +164,8 @@ Users have been trained by Google to expect instant feedback. Fighting this expe
 *The search features I aimed to implement*
 
 ---
+
+# SOLUTION 2: Creating a Visual Journey Map
 
 ## Building a Visual Journey Map
 
@@ -215,6 +219,8 @@ The roadmap helps organize content and teaches the Userology workflow. Users can
 GitHub Copilot accelerated development by generating smooth animations and visual effects. I described the experience I wanted—cards fading in gracefully, subtle movements on hover—and Copilot handled the implementation details.
 
 ---
+
+# SOLUTION 3: Visual Consistency with Product
 
 ## Bringing Userology's Brand to Life
 
@@ -296,6 +302,8 @@ Pushed updated styles to GitHub Pages. Refreshed browser. Nothing changed.
 
 ---
 
+# SOLUTION 4: Mobile Optimization
+
 ## Mobile: When Desktop Success Isn't Enough
 
 ### Learning from Real Devices
@@ -364,6 +372,8 @@ This comprehensive testing helps ensure a good experience across devices.
 
 ---
 
+# SOLUTION 5: Universal Footer for Navigation
+
 ## Creating a Universal Footer for Better Navigation
 
 ### The Challenge of Keeping Users Connected
@@ -415,6 +425,8 @@ Instead of the traditional multi-column grid layout, I designed a centered foote
 **Navigation redundancy:** Even if users scroll past all content, they can still access key sections without scrolling back up
 
 ---
+
+# SOLUTION 6: Engagement & Discovery Features
 
 ## Features to Support Continued Learning
 
