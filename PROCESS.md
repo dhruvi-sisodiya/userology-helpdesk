@@ -56,6 +56,57 @@ I took notes on every friction point, every moment of confusion, every time I th
 
 ---
 
+## User Journey Workflow Map
+
+```mermaid
+graph TD
+    Start[User Arrives at Help Center] --> Decision{What do they need?}
+    
+    Decision -->|Specific question| Search[Use Search]
+    Decision -->|General guidance| Browse[Browse Roadmap]
+    Decision -->|Explore content| Navigate[Navigate Categories]
+    
+    Search --> SearchResults{Found it?}
+    SearchResults -->|Yes| ReadArticle[Read Article]
+    SearchResults -->|No| Browse
+    
+    Browse --> SelectStage[Select Workflow Stage]
+    SelectStage --> ReadArticle
+    
+    Navigate --> BrowseTopics[Browse Topics]
+    BrowseTopics --> ReadArticle
+    
+    ReadArticle --> Feedback{Was it helpful?}
+    Feedback -->|Yes| ThumbsUp[👍 Thumbs Up]
+    Feedback -->|No| ThumbsDown[👎 + Comment]
+    Feedback -->|Neutral| Discovery[See Related Articles]
+    
+    ThumbsUp --> Discovery
+    ThumbsDown --> Discovery
+    
+    Discovery --> MoreLearning{Want to learn more?}
+    MoreLearning -->|Yes| ReadArticle
+    MoreLearning -->|No| ContactSupport[Email Support]
+    MoreLearning -->|Done| End[Leave Satisfied]
+    
+    ContactSupport --> End
+    
+    style Start fill:#8c40ff,color:#fff
+    style End fill:#00d4aa,color:#fff
+    style ReadArticle fill:#3b82f6,color:#fff
+    style Search fill:#60a5fa,color:#fff
+    style Browse fill:#60a5fa,color:#fff
+    style Discovery fill:#a78bfa,color:#fff
+```
+
+**Key Journey Improvements:**
+- **Multiple entry points**: Search, roadmap, or category browsing
+- **Feedback loop**: Users can express satisfaction or concerns
+- **Guided discovery**: Related articles keep users engaged
+- **Support fallback**: Easy access to email support when needed
+
+---
+
 ## The Problems I Uncovered
 
 After user testing myself, I organized issues by their **impact on user experience**:
@@ -114,7 +165,16 @@ This became my development sequence.
 
 ---
 
-# SOLUTION 1: Building Functional Search
+<div align="center">
+
+## 🔍 SOLUTIONS IMPLEMENTED
+
+</div>
+
+---
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# <span style="color: #8c40ff;">SOLUTION 1: Building Functional Search</span>
 
 ## Fixing Search: Making It Actually Work
 
@@ -163,8 +223,9 @@ Users have been trained by Google to expect instant feedback. Fighting this expe
 *The search features I aimed to implement*
 
 ---
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-# SOLUTION 2: Creating a Visual Journey Map
+# <span style="color: #8c40ff;">SOLUTION 2: Creating a Visual Journey Map</span>
 
 ## Building a Visual Journey Map
 
@@ -221,8 +282,9 @@ The roadmap helps organize content and teaches the Userology workflow. Users can
 GitHub Copilot accelerated development by generating smooth animations and visual effects. I described the experience I wanted—cards fading in gracefully, subtle movements on hover—and Copilot handled the implementation details.
 
 ---
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-# SOLUTION 3: Visual Consistency with Product
+# <span style="color: #8c40ff;">SOLUTION 3: Visual Consistency with Product</span>
 
 ## Bringing Userology's Brand to Life
 
@@ -301,8 +363,9 @@ Pushed updated styles to GitHub Pages. Refreshed browser. Nothing changed.
 
 
 ---
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-# SOLUTION 4: Mobile Optimization
+# <span style="color: #8c40ff;">SOLUTION 4: Mobile Optimization</span>
 
 ## Mobile: When Desktop Success Isn't Enough
 
@@ -371,8 +434,9 @@ Apple's guidelines recommend 44-pixel minimum touch targets. I was using 36-pixe
 This comprehensive testing helps ensure a good experience across devices.
 
 ---
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-# SOLUTION 6: Engagement & Discovery Features
+# <span style="color: #8c40ff;">SOLUTION 6: Engagement & Discovery Features</span>
 
 ## Helping Users Continue Learning
 
